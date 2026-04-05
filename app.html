@@ -2971,6 +2971,7 @@ function druckRechnung(id) {
   </table>
   <div class="payment">Bitte überweisen Sie den Betrag bis zum <strong>${r.faellig}</strong> auf folgendes Konto:<br>
   ${profil.iban ? `IBAN: <strong>${profil.iban}</strong>${profil.bic?' · BIC: <strong>'+profil.bic+'</strong>':''}${profil.bank?' · '+profil.bank:''}<br>` : ''}Verwendungszweck: <strong>${r.nr}</strong></div>
+  ${r.ust == 0 ? `<div style="font-size:12px;color:#666;background:#fff8f0;border:1px solid #f0d8b8;padding:12px 16px;border-radius:6px;margin-bottom:20px;">Gemäß §19 Abs. 1 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).</div>` : ''}
   <div class="footer">Gemäß §14 UStG${profil.firma?' — '+profil.firma:''}${profil.strasse?' — '+profil.strasse+', '+profil.ort:''}${profil.ustid?' — USt-IdNr: '+profil.ustid:(profil.steuernr?' — StNr: '+profil.steuernr:'')}</div>
   <script>window.onload=()=>{window.print();}<\/script>
   </body></html>`);
@@ -3115,9 +3116,9 @@ function updateRechnung(id) {
 const kvStatusLabel = { 'kv-entwurf':'Entwurf', 'kv-gesendet':'Gesendet', 'kv-angenommen':'Angenommen', 'kv-abgelehnt':'Abgelehnt' };
 
 let kostenvoranschlaege = [
-  { id:1, nr:'KV-2026-001', empfaenger:'Immobilien GmbH Müller', datum:'2026-03-20', gueltigBis:'2026-04-20', positionen:[{ beschreibung:'Gartengestaltung Frühjahr', menge:8, einheit:'Std', einzelpreis:45.00 },{ beschreibung:'Material (Erde, Pflanzen)', menge:1, einheit:'Pausch.', einzelpreis:120.00 }], ust:19, status:'kv-angenommen' },
-  { id:2, nr:'KV-2026-002', empfaenger:'WEG Nordring 7', datum:'2026-04-01', gueltigBis:'2026-04-30', positionen:[{ beschreibung:'Außenreinigung Fassade', menge:6, einheit:'Std', einzelpreis:55.00 }], ust:19, status:'kv-gesendet' },
-  { id:3, nr:'KV-2026-003', empfaenger:'Hausverwaltung Schmidt & Partner', datum:'2026-04-04', gueltigBis:'2026-05-04', positionen:[{ beschreibung:'Dachrinnenreinigung', menge:3, einheit:'Std', einzelpreis:60.00 },{ beschreibung:'Kleinmaterial', menge:1, einheit:'Pausch.', einzelpreis:25.00 }], ust:19, status:'kv-entwurf' },
+  { id:1, nr:'KV-2026-001', empfaenger:'Immobilien GmbH Müller', empfaengerAdresse:'Berliner Str. 10, 12345 Berlin', datum:'2026-03-20', gueltigBis:'2026-04-20', positionen:[{ beschreibung:'Gartengestaltung Frühjahr', menge:8, einheit:'Std', einzelpreis:45.00 },{ beschreibung:'Material (Erde, Pflanzen)', menge:1, einheit:'Pausch.', einzelpreis:120.00 }], ust:19, status:'kv-angenommen' },
+  { id:2, nr:'KV-2026-002', empfaenger:'WEG Nordring 7', empfaengerAdresse:'Nordring 7, 12347 Berlin', datum:'2026-04-01', gueltigBis:'2026-04-30', positionen:[{ beschreibung:'Außenreinigung Fassade', menge:6, einheit:'Std', einzelpreis:55.00 }], ust:19, status:'kv-gesendet' },
+  { id:3, nr:'KV-2026-003', empfaenger:'Hausverwaltung Schmidt & Partner', empfaengerAdresse:'Hauptstraße 44, 12346 Berlin', datum:'2026-04-04', gueltigBis:'2026-05-04', positionen:[{ beschreibung:'Dachrinnenreinigung', menge:3, einheit:'Std', einzelpreis:60.00 },{ beschreibung:'Kleinmaterial', menge:1, einheit:'Pausch.', einzelpreis:25.00 }], ust:19, status:'kv-entwurf' },
 ];
 let kvFilter = 'alle';
 let kvNrZaehler = 4;
@@ -3168,6 +3169,7 @@ function openKVDetail(id) {
       <div>
         <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--stone);margin-bottom:4px;">Empfänger</div>
         <div style="font-weight:600;">${kv.empfaenger}</div>
+        ${kv.empfaengerAdresse ? `<div style="font-size:0.8rem;color:var(--stone);">${kv.empfaengerAdresse}</div>` : ''}
       </div>
       <div>
         <div style="font-size:0.8rem;color:var(--stone);">Datum: <strong style="color:var(--ink)">${fmtDatum(kv.datum)}</strong></div>
@@ -3223,7 +3225,8 @@ function openKVModal(kv = null) {
         </select>
       </div>
     </div>
-    <div class="form-group"><label>Empfänger</label><input type="text" id="kv-empf" value="${isEdit?kv.empfaenger:''}" placeholder="Firma / Name" /></div>
+    <div class="form-group"><label>Empfänger (Firma / Name)</label><input type="text" id="kv-empf" value="${isEdit?kv.empfaenger:''}" placeholder="z. B. Hausverwaltung Müller GmbH" /></div>
+    <div class="form-group"><label>Adresse Empfänger</label><input type="text" id="kv-adresse" value="${isEdit?(kv.empfaengerAdresse||''):''}" placeholder="Straße, PLZ Ort" /></div>
     <div class="form-row">
       <div class="form-group"><label>Datum</label><input type="date" id="kv-datum" value="${isEdit?kv.datum:heute}" /></div>
       <div class="form-group"><label>Gültig bis</label><input type="date" id="kv-gueltig" value="${isEdit?kv.gueltigBis:gueltig}" /></div>
@@ -3274,6 +3277,7 @@ function saveKV() {
     id: Date.now(),
     nr: document.getElementById('kv-nr').value,
     empfaenger: document.getElementById('kv-empf').value,
+    empfaengerAdresse: document.getElementById('kv-adresse').value,
     datum: document.getElementById('kv-datum').value,
     gueltigBis: document.getElementById('kv-gueltig').value,
     positionen,
@@ -3291,6 +3295,7 @@ function updateKV(id) {
   const kv = kostenvoranschlaege.find(x => x.id === id);
   kv.nr = document.getElementById('kv-nr').value;
   kv.empfaenger = document.getElementById('kv-empf').value;
+  kv.empfaengerAdresse = document.getElementById('kv-adresse').value;
   kv.datum = document.getElementById('kv-datum').value;
   kv.gueltigBis = document.getElementById('kv-gueltig').value;
   kv.positionen = getKVPositionen();
@@ -3322,7 +3327,7 @@ function kvZuRechnung(id) {
     id: Date.now(),
     nr,
     empfaenger: kv.empfaenger,
-    empfaengerAdresse: '',
+    empfaengerAdresse: kv.empfaengerAdresse || '',
     empfaengerSteuernr: '',
     leistungsdatum: heute,
     rechnungsdatum: heute,
@@ -3358,7 +3363,7 @@ function druckKV(id) {
       <div style="font-size:12px;color:#666;margin-top:6px;">Datum: ${kv.datum}<br>Gültig bis: ${kv.gueltigBis}</div>
     </div>
   </div>
-  <div style="margin-bottom:24px;"><strong>An:</strong><br>${kv.empfaenger}</div>
+  <div style="margin-bottom:24px;"><strong>An:</strong><br>${kv.empfaenger}${kv.empfaengerAdresse?'<br>'+kv.empfaengerAdresse:''}</div>
   <table><thead><tr><th>Beschreibung</th><th style="text-align:right">Menge</th><th>Einheit</th><th style="text-align:right">Einzelpreis</th><th style="text-align:right">Gesamt</th></tr></thead>
   <tbody>${kv.positionen.map(p=>`<tr><td>${p.beschreibung}</td><td style="text-align:right">${p.menge}</td><td>${p.einheit}</td><td style="text-align:right">${p.einzelpreis.toFixed(2)} €</td><td style="text-align:right">${(p.menge*p.einzelpreis).toFixed(2)} €</td></tr>`).join('')}</tbody></table>
   <div style="text-align:right;margin-top:20px;line-height:2;font-size:14px;">
@@ -3366,8 +3371,11 @@ function druckKV(id) {
     <div>MwSt. ${kv.ust}%: ${mwst.toFixed(2)} €</div>
     <div class="total">Gesamt: ${brutto.toFixed(2)} €</div>
   </div>
-  ${profil.iban ? `<div style="margin-top:24px;font-size:12px;color:#666;background:#f5f0e8;padding:12px 16px;border-radius:6px;">Bankverbindung: IBAN ${profil.iban}${profil.bic?' · BIC '+profil.bic:''}${profil.bank?' · '+profil.bank:''}</div>` : ''}
-  <div style="font-size:11px;color:#aaa;border-top:1px solid #eee;padding-top:10px;margin-top:20px;text-align:center;">Kostenvoranschlag${profil.firma?' — '+profil.firma:''}${profil.ort?' — '+profil.ort:''}</div>
+  <div style="margin-top:24px;font-size:12px;color:#666;background:#fff8f0;border:1px solid #f0d8b8;padding:12px 16px;border-radius:6px;line-height:1.7;">
+    <strong>Hinweis:</strong> Dieser Kostenvoranschlag ist unverbindlich und gemäß §632 BGB eine Schätzung der voraussichtlichen Kosten. Kostenüberschreitungen von bis zu 15% sind ohne gesonderte Benachrichtigung möglich. Bei einer voraussichtlichen Überschreitung von mehr als 15% werden wir Sie unverzüglich informieren.
+  </div>
+  ${profil.iban ? `<div style="margin-top:12px;font-size:12px;color:#666;background:#f5f0e8;padding:12px 16px;border-radius:6px;">Bankverbindung: IBAN ${profil.iban}${profil.bic?' · BIC '+profil.bic:''}${profil.bank?' · '+profil.bank:''}</div>` : ''}
+  <div style="font-size:11px;color:#aaa;border-top:1px solid #eee;padding-top:10px;margin-top:20px;text-align:center;">Kostenvoranschlag${profil.firma?' — '+profil.firma:''}${profil.ort?' — '+profil.ort:''}${profil.ustid?' — USt-IdNr: '+profil.ustid:(profil.steuernr?' — StNr: '+profil.steuernr:'')}</div>
   <script>window.print();<\/script></body></html>`);
   w.document.close();
 }
