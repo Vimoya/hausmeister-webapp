@@ -428,13 +428,13 @@
     if (!email || !pw) { showError('reg-error', 'Bitte alle Felder ausfüllen.'); return; }
     if (pw !== pw2)    { showError('reg-error', 'Passwörter stimmen nicht überein.'); return; }
     if (pw.length < 6) { showError('reg-error', 'Passwort muss mindestens 6 Zeichen haben.'); return; }
-    setLoading('register', true);
+    setLoading('reg', true);
     try {
       await auth.createUserWithEmailAndPassword(email, pw);
       document.getElementById('reg-success').classList.add('show');
       setTimeout(() => { window.location.href = 'app.html'; }, 1200);
     } catch(e) {
-      setLoading('register', false);
+      setLoading('reg', false);
       const msgs = {
         'auth/email-already-in-use': 'Diese E-Mail ist bereits registriert.',
         'auth/invalid-email':        'Ungültige E-Mail-Adresse.',
