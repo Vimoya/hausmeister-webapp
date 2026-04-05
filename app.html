@@ -699,10 +699,65 @@
         max-width: 100%;
         display: block;
       }
-      .modal { padding: 20px 16px; max-height: 85vh; }
-      .modal-overlay { align-items: flex-end; padding: 0; }
-      .modal { border-radius: var(--radius) var(--radius) 0 0; max-height: 92vh; }
+      /* ── Modals: Bottom-Sheet auf Mobile ── */
+      .modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+        z-index: 2000 !important;
+      }
+      .modal {
+        border-radius: 18px 18px 0 0;
+        padding: 20px 18px 32px;
+        max-height: 92vh;
+        max-width: 100%;
+        width: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        animation: modal-slide-up 0.25s cubic-bezier(0.22,1,0.36,1) both;
+      }
+      @keyframes modal-slide-up {
+        from { transform: translateY(100%); }
+        to   { transform: translateY(0); }
+      }
+      /* Drag-Handle oben */
+      .modal::before {
+        content: '';
+        display: block;
+        width: 40px; height: 4px;
+        background: var(--parchment-dk);
+        border-radius: 2px;
+        margin: 0 auto 16px;
+      }
+      .modal h3 { font-size: 1.2rem; margin-bottom: 14px; }
+
+      /* ── Alle Forms im Modal: einspaltig ── */
       .form-row { flex-direction: column; gap: 0; }
+      .form-group { margin-bottom: 12px; }
+      .form-group input, .form-group select, .form-group textarea {
+        font-size: 1rem; /* verhindert iOS Auto-Zoom */
+        padding: 11px 13px;
+      }
+
+      /* ── Modal-Buttons: vollbreite gestapelt ── */
+      .modal-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .modal-actions .btn-primary,
+      .modal-actions .btn-ghost,
+      .modal-actions .btn-danger {
+        width: 100%;
+        justify-content: center;
+        padding: 13px;
+        font-size: 0.95rem;
+      }
+
+      /* Detail-Cards in Modals */
+      .modal [style*="display:grid"],
+      .modal [style*="display: grid"] {
+        grid-template-columns: 1fr !important;
+      }
       /* ── Search inputs (inline styles überschreiben) ── */
       #aufgaben-search, #mieter-search, #kunden-search {
         width: 100% !important; max-width: 100% !important;
@@ -775,7 +830,7 @@
       .mieter-grid { grid-template-columns: 1fr; }
       .berichte-grid-3 { grid-template-columns: 1fr; }
       .rechner-row { grid-template-columns: 1fr; }
-      .modal { padding: 14px 12px; }
+      .modal { padding: 16px 14px 28px; }
       .page-header h2 { font-size: 1.4rem; }
       .nav-item { min-width: 50px; font-size: 0.52rem; padding: 6px 6px; }
       .nav-icon { width: 18px; height: 18px; }
