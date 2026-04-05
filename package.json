@@ -2,9 +2,7 @@
   "name": "hausmeister-pro",
   "version": "1.0.0",
   "scripts": {
-    "start": "serve . -l $PORT"
+    "start": "node server.js"
   },
-  "dependencies": {
-    "serve": "^14.2.3"
-  }
+  "dependencies": {}
 }
