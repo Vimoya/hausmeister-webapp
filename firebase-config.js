@@ -4,12 +4,12 @@
 //  Zu finden unter: Firebase Console → Projekteinstellungen
 // ═══════════════════════════════════════════════════════
 const firebaseConfig = {
-  apiKey:            "DEIN_API_KEY",
-  authDomain:        "DEIN_PROJEKT.firebaseapp.com",
-  projectId:         "DEIN_PROJEKT_ID",
-  storageBucket:     "DEIN_PROJEKT.appspot.com",
-  messagingSenderId: "DEIN_SENDER_ID",
-  appId:             "DEINE_APP_ID"
+  apiKey:            "AIzaSyCJSrT7EyuWKXWsO5xDgEFN2VBwOobpGlE",
+  authDomain:        "hausmeisterpro-43d47.firebaseapp.com",
+  projectId:         "hausmeisterpro-43d47",
+  storageBucket:     "hausmeisterpro-43d47.firebasestorage.app",
+  messagingSenderId: "821368473024",
+  appId:             "1:821368473024:web:f01bc7d9bb5acbf84af425"
 };
 
 firebase.initializeApp(firebaseConfig);
