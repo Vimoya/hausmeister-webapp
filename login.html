@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hausmeister Pro — Anmelden</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-deep:   #1a3a2a;
+      --green-mid:    #2d5a3d;
+      --green-soft:   #4a7c5e;
+      --green-pale:   #a8c5b0;
+      --cream:        #f5f0e8;
+      --parchment:    #ede6d6;
+      --parchment-dk: #d4c9b0;
+      --terra:        #c0622a;
+      --terra-pale:   #e8956a;
+      --stone:        #7a7468;
+      --ink:          #1e1c18;
+      --white:        #fdfaf5;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── Left panel ── */
+    .left {
+      width: 420px;
+      flex-shrink: 0;
+      background: var(--green-deep);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 44px;
+      position: relative;
+      overflow: hidden;
+    }
+    .left::before {
+      content: '';
+      position: absolute;
+      bottom: -80px; right: -80px;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74,124,94,0.35) 0%, transparent 70%);
+    }
+    .left::after {
+      content: '';
+      position: absolute;
+      top: -60px; left: -60px;
+      width: 240px; height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168,197,176,0.12) 0%, transparent 70%);
+    }
+    .logo { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+    .logo svg { width: 36px; height: 36px; flex-shrink: 0; }
+    .logo-text { font-family: 'Cormorant Garant', serif; font-size: 1.4rem; font-weight: 700; color: var(--cream); line-height: 1.1; }
+    .logo-text span { color: var(--green-pale); font-weight: 400; font-style: italic; }
+
+    .left-body { position: relative; z-index: 1; }
+    .left-body h2 {
+      font-family: 'Cormorant Garant', serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1.15;
+      margin-bottom: 18px;
+    }
+    .left-body h2 em { color: var(--terra-pale); font-style: italic; }
+    .left-body p { font-size: 0.9rem; color: var(--green-pale); line-height: 1.7; }
+
+    .left-features { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; }
+    .feat { display: flex; align-items: center; gap: 12px; }
+    .feat-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--terra-pale); flex-shrink: 0; }
+    .feat-text { font-size: 0.82rem; color: rgba(168,197,176,0.8); }
+
+    /* ── Right panel ── */
+    .right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 32px;
+      background: var(--cream);
+      position: relative;
+    }
+    .right::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse 600px 500px at 80% 20%, rgba(74,124,94,0.05) 0%, transparent 70%),
+        radial-gradient(ellipse 400px 600px at 10% 90%, rgba(192,98,42,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .form-card {
+      background: var(--white);
+      border-radius: 20px;
+      border: 1px solid var(--parchment-dk);
+      box-shadow: 0 8px 48px rgba(26,58,42,0.10);
+      padding: 44px 48px;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tab-row {
+      display: flex;
+      gap: 0;
+      background: var(--parchment);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 32px;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--stone);
+      transition: all 0.2s;
+      border: none;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .tab.active {
+      background: var(--white);
+      color: var(--green-deep);
+      font-weight: 600;
+      box-shadow: 0 1px 8px rgba(26,58,42,0.10);
+    }
+
+    .form-title {
+      font-family: 'Cormorant Garant', serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: 6px;
+    }
+    .form-sub {
+      font-size: 0.85rem;
+      color: var(--stone);
+      margin-bottom: 28px;
+    }
+
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--stone);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+    .field input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1.5px solid var(--parchment-dk);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      background: var(--cream);
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .field input:focus {
+      border-color: var(--green-soft);
+      box-shadow: 0 0 0 3px rgba(74,124,94,0.10);
+      background: var(--white);
+    }
+    .field input::placeholder { color: var(--parchment-dk); }
+
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: var(--green-mid);
+      color: var(--cream);
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-submit:hover { background: var(--green-deep); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,58,42,0.2); }
+    .btn-submit:active { transform: none; }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .error-msg {
+      background: rgba(192,98,42,0.08);
+      border: 1px solid rgba(192,98,42,0.2);
+      color: var(--terra);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.83rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    .success-msg {
+      background: rgba(74,124,94,0.08);
+      border: 1px solid rgba(74,124,94,0.2);
+      color: var(--green-soft);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.83rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .success-msg.show { display: block; }
+
+    .divider { text-align: center; margin: 20px 0; color: var(--parchment-dk); font-size: 0.8rem; position: relative; }
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: var(--parchment-dk);
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    .back-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.82rem;
+      color: var(--stone);
+    }
+    .back-link a { color: var(--green-soft); text-decoration: none; font-weight: 500; }
+    .back-link a:hover { text-decoration: underline; }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(245,240,232,0.4);
+      border-top-color: var(--cream);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* panel visibility */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    @media (max-width: 720px) {
+      body { flex-direction: column; }
+      .left { width: 100%; padding: 32px 24px; flex-direction: row; align-items: center; justify-content: space-between; }
+      .left-body, .left-features { display: none; }
+      .form-card { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Left branding panel ── -->
+<div class="left">
+  <div class="logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 4C16 4 8 10 8 18a8 8 0 0016 0c0-8-8-14-8-14z" fill="rgba(168,197,176,0.25)" stroke="#a8c5b0" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M16 10C16 10 11 14.5 11 19.5a5 5 0 0010 0C21 14.5 16 10 16 10z" fill="rgba(168,197,176,0.3)"/>
+      <line x1="16" y1="14" x2="16" y2="29" stroke="#a8c5b0" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="16" y1="18" x2="11" y2="14" stroke="#a8c5b0" stroke-width="1" stroke-linecap="round"/>
+      <line x1="16" y1="22" x2="20" y2="18" stroke="#a8c5b0" stroke-width="1" stroke-linecap="round"/>
+    </svg>
+    <div class="logo-text">Hausmeister <span>Pro</span></div>
+  </div>
+
+  <div class="left-body">
+    <h2>Willkommen<br>zurück.<br><em>Alles im Griff.</em></h2>
+    <p>Ihre persönliche Verwaltungszentrale für Gebäude, Mieter und Garten.</p>
+  </div>
+
+  <div class="left-features">
+    <div class="feat"><div class="feat-dot"></div><div class="feat-text">Eigene Daten — sicher in der Cloud</div></div>
+    <div class="feat"><div class="feat-dot"></div><div class="feat-text">Jederzeit von überall erreichbar</div></div>
+    <div class="feat"><div class="feat-dot"></div><div class="feat-text">Jeder Kunde verwaltet seine eigenen Objekte</div></div>
+  </div>
+</div>
+
+<!-- ── Right form panel ── -->
+<div class="right">
+  <div class="form-card">
+    <div class="tab-row">
+      <button class="tab active" onclick="switchTab('login')">Anmelden</button>
+      <button class="tab" onclick="switchTab('register')">Registrieren</button>
+    </div>
+
+    <!-- Login panel -->
+    <div class="panel active" id="panel-login">
+      <div class="form-title">Anmelden</div>
+      <div class="form-sub">Mit deinem Hausmeister Pro Konto einloggen.</div>
+      <div class="error-msg" id="login-error"></div>
+      <div class="field">
+        <label>E-Mail</label>
+        <input type="email" id="login-email" placeholder="name@beispiel.de" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label>Passwort</label>
+        <input type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn-submit" id="btn-login" onclick="doLogin()">
+        <span id="login-label">Anmelden</span>
+        <div class="spinner" id="login-spinner"></div>
+      </button>
+    </div>
+
+    <!-- Register panel -->
+    <div class="panel" id="panel-register">
+      <div class="form-title">Konto erstellen</div>
+      <div class="form-sub">Kostenlos registrieren — deine Daten gehören dir.</div>
+      <div class="error-msg" id="reg-error"></div>
+      <div class="success-msg" id="reg-success">Konto erfolgreich erstellt! Du wirst weitergeleitet…</div>
+      <div class="field">
+        <label>E-Mail</label>
+        <input type="email" id="reg-email" placeholder="name@beispiel.de" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label>Passwort</label>
+        <input type="password" id="reg-pw" placeholder="Mindestens 6 Zeichen" autocomplete="new-password" />
+      </div>
+      <div class="field">
+        <label>Passwort wiederholen</label>
+        <input type="password" id="reg-pw2" placeholder="••••••••" autocomplete="new-password" />
+      </div>
+      <button class="btn-submit" id="btn-register" onclick="doRegister()">
+        <span id="reg-label">Konto erstellen</span>
+        <div class="spinner" id="reg-spinner"></div>
+      </button>
+    </div>
+
+    <div class="back-link"><a href="index.html">← Zurück zur Startseite</a></div>
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  const auth = firebase.auth();
+
+  // If already logged in → go straight to dashboard
+  auth.onAuthStateChanged(user => {
+    if (user) window.location.href = 'app.html';
+  });
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (tab === 'login' ? i === 0 : i === 1)));
+    document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+    document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+  }
+
+  function setLoading(formId, loading) {
+    const btn    = document.getElementById('btn-' + formId);
+    const label  = document.getElementById(formId + '-label');
+    const spinner = document.getElementById(formId + '-spinner');
+    btn.disabled    = loading;
+    spinner.style.display = loading ? 'block' : 'none';
+    label.style.opacity   = loading ? '0' : '1';
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+  function clearError(id) {
+    document.getElementById(id).classList.remove('show');
+  }
+
+  // Enter-Taste
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const loginActive = document.getElementById('panel-login').classList.contains('active');
+    if (loginActive) doLogin();
+    else doRegister();
+  });
+
+  async function doLogin() {
+    clearError('login-error');
+    const email = document.getElementById('login-email').value.trim();
+    const pw    = document.getElementById('login-pw').value;
+    if (!email || !pw) { showError('login-error', 'Bitte E-Mail und Passwort eingeben.'); return; }
+    setLoading('login', true);
+    try {
+      await auth.signInWithEmailAndPassword(email, pw);
+      window.location.href = 'app.html';
+    } catch(e) {
+      setLoading('login', false);
+      const msgs = {
+        'auth/user-not-found':    'Kein Konto mit dieser E-Mail gefunden.',
+        'auth/wrong-password':    'Falsches Passwort.',
+        'auth/invalid-email':     'Ungültige E-Mail-Adresse.',
+        'auth/too-many-requests': 'Zu viele Versuche. Bitte später erneut versuchen.',
+        'auth/invalid-credential': 'E-Mail oder Passwort falsch.',
+      };
+      showError('login-error', msgs[e.code] || 'Anmeldung fehlgeschlagen: ' + e.message);
+    }
+  }
+
+  async function doRegister() {
+    clearError('reg-error');
+    const email = document.getElementById('reg-email').value.trim();
+    const pw    = document.getElementById('reg-pw').value;
+    const pw2   = document.getElementById('reg-pw2').value;
+    if (!email || !pw) { showError('reg-error', 'Bitte alle Felder ausfüllen.'); return; }
+    if (pw !== pw2)    { showError('reg-error', 'Passwörter stimmen nicht überein.'); return; }
+    if (pw.length < 6) { showError('reg-error', 'Passwort muss mindestens 6 Zeichen haben.'); return; }
+    setLoading('register', true);
+    try {
+      await auth.createUserWithEmailAndPassword(email, pw);
+      document.getElementById('reg-success').classList.add('show');
+      setTimeout(() => { window.location.href = 'app.html'; }, 1200);
+    } catch(e) {
+      setLoading('register', false);
+      const msgs = {
+        'auth/email-already-in-use': 'Diese E-Mail ist bereits registriert.',
+        'auth/invalid-email':        'Ungültige E-Mail-Adresse.',
+        'auth/weak-password':        'Passwort zu schwach (mindestens 6 Zeichen).',
+      };
+      showError('reg-error', msgs[e.code] || 'Registrierung fehlgeschlagen: ' + e.message);
+    }
+  }
+</script>
+</body>
+</html>

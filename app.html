@@ -7,7 +7,52 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <style>
+    /* Auth loading overlay */
+    #auth-overlay {
+      position: fixed; inset: 0;
+      background: var(--cream, #f5f0e8);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 99999;
+      flex-direction: column; gap: 16px;
+    }
+    #auth-overlay .ao-logo {
+      font-family: 'Cormorant Garant', serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--green-deep, #1a3a2a);
+    }
+    #auth-overlay .ao-spinner {
+      width: 28px; height: 28px;
+      border: 2px solid rgba(26,58,42,0.15);
+      border-top-color: var(--green-soft, #4a7c5e);
+      border-radius: 50%;
+      animation: ao-spin 0.8s linear infinite;
+    }
+    @keyframes ao-spin { to { transform: rotate(360deg); } }
+    /* Logout button in sidebar */
+    .btn-logout {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 8px 10px;
+      background: rgba(192,98,42,0.08);
+      border: 1px solid rgba(192,98,42,0.15);
+      border-radius: 8px;
+      color: var(--terra-pale, #e8956a);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem; font-weight: 500;
+      cursor: pointer; transition: all 0.18s;
+      margin-top: 4px;
+    }
+    .btn-logout:hover { background: rgba(192,98,42,0.16); }
+    .user-info {
+      font-size: 0.68rem; color: var(--green-pale, #a8c5b0);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      padding: 2px 10px 4px;
+    }
     :root {
       --green-deep:   #1a3a2a;
       --green-mid:    #2d5a3d;
@@ -34,6 +79,7 @@
 
     /* ── Sidebar ── */
     .sidebar { width: var(--sidebar-w); background: var(--green-deep); height: 100vh; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; z-index: 100; overflow: hidden; }
+    .sidebar-footer { flex-shrink: 0; }
     .sidebar::before { content: ''; position: absolute; bottom: -60px; right: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(74,124,94,0.3) 0%, transparent 70%); pointer-events: none; }
     .sidebar-logo { padding: 10px 16px 8px; border-bottom: 1px solid rgba(168,197,176,0.15); }
     .sidebar-logo .logo-icon { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
@@ -48,7 +94,7 @@
     .season-dot.autumn { background: #e0722a; }
     .season-dot.winter { background: #a0c0d8; }
     .season-label { padding: 0 16px 4px; font-size: 0.62rem; color: var(--green-pale); letter-spacing: 0.1em; text-transform: uppercase; }
-    nav { flex: 1; padding: 2px 8px; overflow-y: hidden; }
+    nav { flex: 1; padding: 2px 8px; overflow-y: auto; min-height: 0; }
     .nav-group-label { font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(168,197,176,0.5); padding: 5px 10px 2px; }
     .nav-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; border-radius: var(--radius-sm); cursor: pointer; color: rgba(245,240,232,0.65); font-size: 0.8rem; font-weight: 400; transition: all 0.18s ease; position: relative; }
     .nav-item:hover { background: rgba(168,197,176,0.1); color: var(--cream); }
@@ -507,6 +553,12 @@
 </head>
 <body>
 
+<!-- Auth loading overlay (hidden once auth is confirmed) -->
+<div id="auth-overlay">
+  <div class="ao-logo">Hausmeister Pro</div>
+  <div class="ao-spinner"></div>
+</div>
+
 <!-- ── Sidebar ── -->
 <aside class="sidebar">
   <div class="sidebar-logo">
@@ -613,6 +665,13 @@
       </div>
       <div class="sw-extra" id="sw-extra"></div>
     </div>
+    <div class="user-info" id="sidebar-user-email"></div>
+    <button class="btn-logout" onclick="doLogout()">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>
+      </svg>
+      Abmelden
+    </button>
   </div>
 </aside>
 
@@ -2024,42 +2083,53 @@ function resolvePersonLabel(val) {
 }
 
 // ═══════════════════════════════
-// PERSISTENCE
+// PERSISTENCE — Firestore per User
 // ═══════════════════════════════
-const STORE_KEYS = ['tasks','mieter','kunden','rechnungen','kostenvoranschlaege','protokollEintraege','meldungen','objekte','zaehlerAblesungen','dokumente','profil'];
+const db   = firebase.firestore();
+const auth = firebase.auth();
 
-function saveAll() {
-  try {
-    localStorage.setItem('hm_tasks', JSON.stringify(tasks));
-    localStorage.setItem('hm_mieter', JSON.stringify(mieter));
-    localStorage.setItem('hm_kunden', JSON.stringify(kunden));
-    localStorage.setItem('hm_rechnungen', JSON.stringify(rechnungen));
-    localStorage.setItem('hm_kv', JSON.stringify(kostenvoranschlaege));
-    localStorage.setItem('hm_protokoll', JSON.stringify(protokollEintraege));
-    localStorage.setItem('hm_meldungen', JSON.stringify(meldungen));
-    localStorage.setItem('hm_objekte', JSON.stringify(objekte));
-    localStorage.setItem('hm_zaehler', JSON.stringify(zaehlerAblesungen));
-    localStorage.setItem('hm_dokumente', JSON.stringify(dokumente));
-    localStorage.setItem('hm_profil', JSON.stringify(profil));
-    localStorage.setItem('hm_garten', JSON.stringify(gartenJobs));
-  } catch(e) { console.warn('localStorage save failed', e); }
+function _userDoc() {
+  const uid = auth.currentUser && auth.currentUser.uid;
+  if (!uid) return null;
+  return db.doc(`users/${uid}/data/main`);
 }
 
-function loadAll() {
+async function saveAll() {
+  const ref = _userDoc();
+  if (!ref) return;
   try {
-    const t = localStorage.getItem('hm_tasks'); if (t) tasks = JSON.parse(t);
-    const mi = localStorage.getItem('hm_mieter'); if (mi) mieter = JSON.parse(mi);
-    const ku = localStorage.getItem('hm_kunden'); if (ku) kunden = JSON.parse(ku);
-    const re = localStorage.getItem('hm_rechnungen'); if (re) rechnungen = JSON.parse(re);
-    const kv = localStorage.getItem('hm_kv'); if (kv) kostenvoranschlaege = JSON.parse(kv);
-    const pr = localStorage.getItem('hm_protokoll'); if (pr) protokollEintraege = JSON.parse(pr);
-    const me = localStorage.getItem('hm_meldungen'); if (me) meldungen = JSON.parse(me);
-    const ob = localStorage.getItem('hm_objekte'); if (ob) objekte = JSON.parse(ob);
-    const za = localStorage.getItem('hm_zaehler'); if (za) zaehlerAblesungen = JSON.parse(za);
-    const do_ = localStorage.getItem('hm_dokumente'); if (do_) dokumente = JSON.parse(do_);
-    const pf = localStorage.getItem('hm_profil'); if (pf) { const p = JSON.parse(pf); Object.assign(profil, p); }
-    const ga = localStorage.getItem('hm_garten'); if (ga) gartenJobs = JSON.parse(ga);
-  } catch(e) { console.warn('localStorage load failed', e); }
+    await ref.set({
+      tasks, mieter, kunden, rechnungen, kostenvoranschlaege,
+      protokollEintraege, meldungen, objekte, zaehlerAblesungen,
+      dokumente, profil, gartenJobs
+    });
+  } catch(e) { console.warn('Firestore save failed', e); }
+}
+
+async function loadAll() {
+  const ref = _userDoc();
+  if (!ref) return;
+  try {
+    const snap = await ref.get();
+    if (!snap.exists) return;
+    const d = snap.data();
+    if (d.tasks)                tasks                = d.tasks;
+    if (d.mieter)               mieter               = d.mieter;
+    if (d.kunden)               kunden               = d.kunden;
+    if (d.rechnungen)           rechnungen           = d.rechnungen;
+    if (d.kostenvoranschlaege)  kostenvoranschlaege  = d.kostenvoranschlaege;
+    if (d.protokollEintraege)   protokollEintraege   = d.protokollEintraege;
+    if (d.meldungen)            meldungen            = d.meldungen;
+    if (d.objekte)              objekte              = d.objekte;
+    if (d.zaehlerAblesungen)    zaehlerAblesungen    = d.zaehlerAblesungen;
+    if (d.dokumente)            dokumente            = d.dokumente;
+    if (d.profil)               Object.assign(profil, d.profil);
+    if (d.gartenJobs)           gartenJobs           = d.gartenJobs;
+  } catch(e) { console.warn('Firestore load failed', e); }
+}
+
+function doLogout() {
+  auth.signOut().then(() => { window.location.href = 'login.html'; });
 }
 
 // ═══════════════════════════════
@@ -3443,9 +3513,26 @@ async function loadWetter() {
     });
   }
 }
-loadAll();
-updateLogoPreview();
-loadWetter();
+// ── Auth gate: check login, then load data ──
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+  // Show user email in sidebar
+  const emailEl = document.getElementById('sidebar-user-email');
+  if (emailEl) emailEl.textContent = user.email;
+
+  // Load user's data from Firestore, then render
+  await loadAll();
+  updateLogoPreview();
+  renderDash();
+  loadWetter();
+
+  // Hide loading overlay
+  const overlay = document.getElementById('auth-overlay');
+  if (overlay) overlay.style.display = 'none';
+});
 </script>
 </body>
 </html>
