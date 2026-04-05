@@ -805,9 +805,56 @@
       .berichte-grid-3 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 
       /* ── Einstellungen ── */
-      .settings-layout { grid-template-columns: 1fr; gap: 16px; }
-      .settings-nav { flex-direction: row; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
-      .settings-nav-item { padding: 6px 12px; font-size: 0.78rem; }
+      .settings-layout { grid-template-columns: 1fr; gap: 12px; }
+      .settings-nav { flex-direction: row; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+      .settings-nav-item { padding: 7px 12px; font-size: 0.78rem; }
+
+      /* ── Settings Groups / Cards ── */
+      .settings-group { padding: 16px 14px; margin-bottom: 12px; border-radius: 12px; }
+      .settings-group h3 { font-size: 0.95rem; margin-bottom: 14px; padding-bottom: 8px; }
+
+      /* ── Form fields ── */
+      .form-row { display: flex; flex-direction: column; gap: 0; }
+      .form-group { margin-bottom: 12px; }
+      .form-group label { font-size: 0.7rem; margin-bottom: 5px; }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 1rem !important; /* iOS no-zoom */
+        padding: 12px 13px;
+        border-radius: 9px;
+      }
+      .form-group textarea { min-height: 80px; }
+
+      /* ── Save bar ── */
+      .save-bar {
+        flex-direction: column-reverse;
+        gap: 8px;
+        margin-top: 6px;
+      }
+      .save-bar .btn-primary,
+      .save-bar .btn-ghost {
+        width: 100%;
+        justify-content: center;
+        padding: 13px;
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      /* ── Toggle rows ── */
+      .toggle-row { padding: 11px 0; gap: 12px; }
+      .toggle-label { font-size: 0.85rem; }
+      .toggle-sub { font-size: 0.72rem; }
+      .toggle { width: 44px; height: 26px; flex-shrink: 0; }
+      .toggle::after { width: 20px; height: 20px; }
+
+      /* ── Logo upload area ── */
+      #logo-preview { width: 90px !important; height: 50px !important; }
+
+      /* ── Card padding allgemein ── */
+      .card { border-radius: 12px; }
+      .card-header { padding: 13px 14px; }
+      .card-title { font-size: 0.95rem; }
 
       /* ── Rechner ── */
       .rechner-layout { grid-template-columns: 1fr; gap: 14px; }
