@@ -593,20 +593,103 @@
       .modal-overlay { align-items: flex-end; padding: 0; }
       .modal { border-radius: var(--radius) var(--radius) 0 0; max-height: 92vh; }
       .form-row { flex-direction: column; gap: 0; }
-      .rechnung-row { flex-wrap: wrap; gap: 6px; padding: 10px 14px; }
-      .rechnung-nr { min-width: unset; }
-      .rechnung-betrag { min-width: unset; }
+      /* ── Search inputs (inline styles überschreiben) ── */
+      #aufgaben-search, #mieter-search, #kunden-search {
+        width: 100% !important; max-width: 100% !important;
+      }
+
+      /* ── Card headers ── */
+      .card-header { flex-wrap: wrap; gap: 8px; padding: 14px 16px; }
+      .card-header .card-title { font-size: 1rem; }
+
+      /* ── Filter chips ── */
+      .task-filters { padding: 10px 14px; gap: 5px; }
+      .filter-chip { font-size: 0.7rem; padding: 3px 9px; }
+
+      /* ── Task items ── */
+      .task-item { padding: 12px 14px; gap: 10px; }
+      .task-del { opacity: 1 !important; }  /* immer sichtbar auf touch */
+
+      /* ── Rechnungen & KV rows ── */
+      .rechnung-row {
+        flex-wrap: wrap; gap: 5px; padding: 10px 14px;
+        align-items: flex-start;
+      }
+      .rechnung-nr { min-width: unset; width: auto; }
+      .rechnung-datum { min-width: unset; flex: 1; text-align: right; }
+      .rechnung-betrag { min-width: unset; width: 100%; font-size: 1rem; }
       .rechnung-status { min-width: unset; }
+      .rechnung-actions { width: 100%; justify-content: flex-end; padding-top: 4px; }
+
+      /* ── Meldungen ── */
+      .meldung-item { padding: 12px 14px; gap: 10px; }
+
+      /* ── Zaehler tabs ── */
+      .zaehler-tab { padding: 6px 12px; font-size: 0.78rem; }
+      .zaehler-tab-init { width: 22px; height: 22px; font-size: 0.6rem; }
+
+      /* ── Garten Monatszellen ── */
+      .monat-cell { min-height: 48px; padding: 4px; font-size: 0.65rem; }
+      .monat-header-cell { font-size: 0.6rem; padding: 4px 2px; }
+
+      /* ── Dokumente ── */
+      .dokumente-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+      /* ── Berichte ── */
+      .berichte-grid { grid-template-columns: 1fr; gap: 14px; }
+      .berichte-grid-3 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+      /* ── Einstellungen ── */
+      .settings-layout { grid-template-columns: 1fr; gap: 16px; }
+      .settings-nav { flex-direction: row; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+      .settings-nav-item { padding: 6px 12px; font-size: 0.78rem; }
+
+      /* ── Rechner ── */
+      .rechner-layout { grid-template-columns: 1fr; gap: 14px; }
+      .rechner-result-col { min-width: unset; }
+
+      /* ── Buttons in page-header ── */
+      .page-header .btn-primary,
+      .page-header .btn-ghost { font-size: 0.8rem; padding: 8px 14px; }
+
+      /* ── Content grid ── */
+      .content-grid { grid-template-columns: 1fr; gap: 14px; }
+
+      /* ── Mieter / Kunden cards ── */
+      .mieter-fullcard { padding: 16px; }
+      .kunden-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 520px) {
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .mieter-grid { grid-template-columns: 1fr; }
       .berichte-grid-3 { grid-template-columns: 1fr; }
       .rechner-row { grid-template-columns: 1fr; }
-      .modal { padding: 16px 14px; }
-      .page-header h2 { font-size: 1.5rem; }
-      .nav-item { min-width: 52px; font-size: 0.55rem; }
+      .modal { padding: 14px 12px; }
+      .page-header h2 { font-size: 1.4rem; }
+      .nav-item { min-width: 50px; font-size: 0.52rem; padding: 6px 6px; }
+      .nav-icon { width: 18px; height: 18px; }
+
+      /* Rechnung row auf sehr kleinen Screens vollständig stacken */
+      .rechnung-row { padding: 10px 12px; }
+      .rechnung-datum { display: none; }  /* Platz sparen, steht im Detail */
+      .rechnung-nr { font-size: 0.88rem; }
+
+      /* Dokumente 2→1 */
+      .dokumente-grid { grid-template-columns: 1fr; }
+
+      /* Filter chips kleiner */
+      .filter-chip { font-size: 0.65rem; padding: 3px 7px; }
+
+      /* Monatszellen */
+      .monat-cell { min-height: 40px; font-size: 0.6rem; }
+
+      /* Stats cards */
+      .stat-card { padding: 14px; }
+      .stat-number { font-size: 1.8rem; }
+
+      /* Meldungen form */
+      .meldungen-form { padding: 14px; }
     }
 
     /* Desktop: mobile elements verstecken */
@@ -851,7 +934,7 @@ Rasenmäher-Wartung überfällig — Werkzeug bestellen.</textarea>
       <div class="card-header">
         <span class="card-title">Alle Aufgaben</span>
         <div style="display:flex;gap:8px;align-items:center;">
-          <input type="text" placeholder="🔍 Suchen…" id="aufgaben-search" oninput="renderAufgaben()" style="padding:7px 12px;border-radius:6px;border:1px solid var(--parchment-dk);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;width:190px;transition:border-color .15s;" onfocus="this.style.borderColor='var(--green-soft)'" onblur="this.style.borderColor='var(--parchment-dk)'"/>
+          <input type="text" placeholder="🔍 Suchen…" id="aufgaben-search" oninput="renderAufgaben()" style="padding:7px 12px;border-radius:6px;border:1px solid var(--parchment-dk);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;width:190px;max-width:100%;transition:border-color .15s;" onfocus="this.style.borderColor='var(--green-soft)'" onblur="this.style.borderColor='var(--parchment-dk)'"/>
           <select id="aufgaben-sort" onchange="renderAufgaben()" style="padding:7px 10px;border-radius:6px;border:1px solid var(--parchment-dk);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.8rem;outline:none;cursor:pointer;">
             <option value="datum">↕ Datum</option>
             <option value="prio">↕ Priorität</option>
@@ -882,7 +965,7 @@ Rasenmäher-Wartung überfällig — Werkzeug bestellen.</textarea>
         <p id="mieter-sub">— Mieter · 15 Einheiten · 3 frei</p>
       </div>
       <div style="display:flex;gap:10px;align-items:center;">
-        <input type="text" placeholder="🔍 Name oder Wohnung…" id="mieter-search" oninput="renderMieter()" style="padding:8px 14px;border-radius:var(--radius-sm);border:1px solid var(--parchment-dk);background:var(--white);font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none;width:220px;transition:border-color .15s;" onfocus="this.style.borderColor='var(--green-soft)'" onblur="this.style.borderColor='var(--parchment-dk)'"/>
+        <input type="text" placeholder="🔍 Name oder Wohnung…" id="mieter-search" oninput="renderMieter()" style="padding:8px 14px;border-radius:var(--radius-sm);border:1px solid var(--parchment-dk);background:var(--white);font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none;width:220px;max-width:100%;transition:border-color .15s;" onfocus="this.style.borderColor='var(--green-soft)'" onblur="this.style.borderColor='var(--parchment-dk)'"/>
         <button class="btn-primary" onclick="openModal('mieter')">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
           Neuer Mieter
