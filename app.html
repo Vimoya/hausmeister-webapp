@@ -1315,11 +1315,11 @@ Rasenmäher-Wartung überfällig — Werkzeug bestellen.</textarea>
           <div class="settings-group">
             <h3>Persönliche Daten</h3>
             <div class="form-row">
-              <div class="form-group"><label>Vorname</label><input type="text" value="Klaus" /></div>
-              <div class="form-group"><label>Nachname</label><input type="text" value="Müller" /></div>
+              <div class="form-group"><label>Vorname</label><input type="text" id="prf-vorname" placeholder="Max" /></div>
+              <div class="form-group"><label>Nachname</label><input type="text" id="prf-nachname" placeholder="Mustermann" /></div>
             </div>
-            <div class="form-group"><label>E-Mail</label><input type="email" value="k.mueller@hausmeisterpro.de" /></div>
-            <div class="form-group"><label>Telefon</label><input type="tel" value="+49 170 1234567" /></div>
+            <div class="form-group"><label>E-Mail</label><input type="email" id="prf-email-person" placeholder="name@beispiel.de" /></div>
+            <div class="form-group"><label>Telefon</label><input type="tel" id="prf-tel-person" placeholder="+49 170 1234567" /></div>
           </div>
           <div class="settings-group">
             <h3>Passwort ändern</h3>
@@ -2582,8 +2582,9 @@ function updateGreeting() {
   else if (h >= 12 && h < 18) gruss = 'Guten Tag';
   else if (h >= 18 && h < 22) gruss = 'Guten Abend';
   else                         gruss = 'Gute Nacht';
+  const name = profil.vorname || profil.firma || 'Willkommen';
   const el = document.getElementById('dash-greeting');
-  if (el) el.innerHTML = `${gruss}, <span>Klaus.</span>`;
+  if (el) el.innerHTML = `${gruss}, <span>${name}.</span>`;
 }
 updateGreeting();
 
@@ -2596,6 +2597,8 @@ renderDash();
 // PROFIL
 // ═══════════════════════════════
 let profil = {
+  vorname:  '',
+  nachname: '',
   logo:     '',
   firma:    '',
   zusatz:   '',
@@ -2637,9 +2640,27 @@ function updateLogoPreview() {
   } else {
     el.innerHTML = `<span style="font-size:0.72rem;color:var(--stone);">Kein Logo</span>`;
   }
+  // Felder mit gespeicherten Werten befüllen
+  const set = (id, val) => { const e = document.getElementById(id); if (e && val) e.value = val; };
+  set('prf-vorname',  profil.vorname);
+  set('prf-nachname', profil.nachname);
+  set('prf-firma',    profil.firma);
+  set('prf-zusatz',   profil.zusatz);
+  set('prf-strasse',  profil.strasse);
+  set('prf-ort',      profil.ort);
+  set('prf-tel',      profil.tel);
+  set('prf-email',    profil.email);
+  set('prf-steuernr', profil.steuernr);
+  set('prf-ustid',    profil.ustid);
+  set('prf-iban',     profil.iban);
+  set('prf-bic',      profil.bic);
+  set('prf-bank',     profil.bank);
+  set('prf-web',      profil.web);
 }
 
 function saveProfil() {
+  profil.vorname  = document.getElementById('prf-vorname')?.value.trim() || '';
+  profil.nachname = document.getElementById('prf-nachname')?.value.trim() || '';
   profil.firma    = document.getElementById('prf-firma').value.trim();
   profil.zusatz   = document.getElementById('prf-zusatz').value.trim();
   profil.strasse  = document.getElementById('prf-strasse').value.trim();
@@ -2653,6 +2674,7 @@ function saveProfil() {
   profil.bank     = document.getElementById('prf-bank').value.trim();
   profil.web      = document.getElementById('prf-web').value.trim();
   saveAll();
+  updateGreeting();
   showToast('Profil & Rechnungsdaten gespeichert');
 }
 
