@@ -534,6 +534,8 @@
       }
       .sidebar-logo,
       .sidebar-footer,
+      .season-bar,
+      .season-label,
       .nav-group-label { display: none; }
       .sidebar nav {
         display: flex;
@@ -546,22 +548,41 @@
         -ms-overflow-style: none;
       }
       .sidebar nav::-webkit-scrollbar { display: none; }
+      /* Nur Icons in der Bottom-Nav — kein Text */
       .nav-item {
         flex-direction: column;
-        gap: 3px;
-        padding: 7px 10px;
-        font-size: 0.58rem;
-        white-space: nowrap;
-        flex: 0 0 auto;
-        min-width: 58px;
+        gap: 0;
+        padding: 0;
+        width: 52px;
+        min-width: 52px;
+        flex: 0 0 52px;
         justify-content: center;
+        align-items: center;
         border-radius: 0;
-        text-align: center;
+        font-size: 0;          /* Text unsichtbar */
+        color: transparent;
       }
-      .nav-icon { width: 20px; height: 20px; }
+      .nav-icon {
+        width: 22px; height: 22px;
+        opacity: 0.65;
+        margin: auto;
+      }
+      .nav-item.active .nav-icon { opacity: 1; }
       .nav-item.active::before { display: none; }
-      .nav-item.active { border-top: 2px solid var(--terra-pale); background: rgba(168,197,176,0.12); }
-      .nav-badge { margin-left: 0; font-size: 0.55rem; padding: 1px 5px; }
+      .nav-item.active {
+        border-top: 2px solid var(--terra-pale);
+        background: rgba(168,197,176,0.12);
+      }
+      /* Badge über Icon */
+      .nav-badge {
+        position: absolute;
+        top: 6px; right: 6px;
+        margin: 0;
+        font-size: 0.55rem;
+        padding: 1px 4px;
+        min-width: 14px;
+      }
+      .nav-item { position: relative; }
 
       .main {
         margin-left: 0;
