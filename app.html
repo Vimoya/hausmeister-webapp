@@ -675,7 +675,30 @@
       .page-header h2 { font-size: 1.7rem; }
       .page-header > div:last-child { display: flex; gap: 8px; flex-wrap: wrap; }
 
-      .monat-cell { min-height: 50px; padding: 5px; }
+      /* Kalender Mobile */
+      .garten-layout { grid-template-columns: 1fr; }
+      .monat-grid, .monat-header {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 3px;
+      }
+      .monat-cell {
+        min-height: 56px;
+        padding: 4px 3px;
+        font-size: 0.7rem;
+      }
+      .monat-cell-date { font-size: 0.68rem; margin-bottom: 2px; }
+      .monat-day-label { font-size: 0.6rem; padding: 2px 0; text-align: center; }
+      /* Job-pills im Kalender kleiner */
+      .monat-cell .job-pill, .monat-cell [style*="background"] {
+        font-size: 0.55rem !important;
+        padding: 1px 3px !important;
+        margin-bottom: 1px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        display: block;
+      }
       .modal { padding: 20px 16px; max-height: 85vh; }
       .modal-overlay { align-items: flex-end; padding: 0; }
       .modal { border-radius: var(--radius) var(--radius) 0 0; max-height: 92vh; }
@@ -769,7 +792,8 @@
       .filter-chip { font-size: 0.65rem; padding: 3px 7px; }
 
       /* Monatszellen */
-      .monat-cell { min-height: 40px; font-size: 0.6rem; }
+      .monat-cell { min-height: 52px; font-size: 0.62rem; }
+      .monat-day-label { font-size: 0.56rem; }
 
       /* Stats cards */
       .stat-card { padding: 14px; }
@@ -1167,13 +1191,17 @@ Rasenmäher-Wartung überfällig — Werkzeug bestellen.</textarea>
         <div class="card-header">
           <span class="card-title" id="garten-card-title">April 2026</span>
         </div>
-        <div style="padding:20px 22px 24px;">
-          <div class="monat-header">
-            <div class="monat-day-label">Mo</div><div class="monat-day-label">Di</div><div class="monat-day-label">Mi</div>
-            <div class="monat-day-label">Do</div><div class="monat-day-label">Fr</div><div class="monat-day-label">Sa</div>
-            <div class="monat-day-label">So</div>
+        <div style="padding:16px 14px 20px;">
+          <div id="monat-scroll-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <div style="min-width:280px;">
+              <div class="monat-header">
+                <div class="monat-day-label">Mo</div><div class="monat-day-label">Di</div><div class="monat-day-label">Mi</div>
+                <div class="monat-day-label">Do</div><div class="monat-day-label">Fr</div><div class="monat-day-label">Sa</div>
+                <div class="monat-day-label">So</div>
+              </div>
+              <div class="monat-grid" id="monat-grid"></div>
+            </div>
           </div>
-          <div class="monat-grid" id="monat-grid"></div>
         </div>
       </div>
 
