@@ -817,7 +817,10 @@
   <button class="mob-hamburger" onclick="openMobNav()" aria-label="Menü">
     <span></span><span></span><span></span>
   </button>
-  <div class="mtb-title" id="mtb-page-title">Dashboard</div>
+  <div class="mtb-title">
+    <span style="font-family:'Cormorant Garant',serif;font-weight:700;color:var(--cream);">Hausmeister</span>
+    <span style="font-family:'Cormorant Garant',serif;font-weight:400;font-style:italic;color:var(--green-pale);"> Pro</span>
+  </div>
   <div class="mtb-weather">
     <span class="mtb-weather-icon" id="mtb-icon">⛅</span>
     <span id="mtb-temp">—°</span>
@@ -3911,8 +3914,7 @@ function closeMobNavIfOutside(e) {
 function mobNavGo(page, title, el) {
   document.querySelectorAll('.mob-nav-item').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
-  const t = document.getElementById('mtb-page-title');
-  if (t) t.textContent = title;
+  // title stays as "Hausmeister Pro"
   goTo(page, document.querySelector('[data-page="' + page + '"]'));
   closeMobNav();
 }
