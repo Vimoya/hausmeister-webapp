@@ -4,5 +4,7 @@
   "scripts": {
     "start": "node server.js"
   },
-  "dependencies": {}
+  "devDependencies": {
+    "canvas": "^3.2.3"
+  }
 }
