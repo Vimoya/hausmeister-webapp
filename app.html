@@ -464,6 +464,69 @@
     .dok-name { font-size:0.8rem; font-weight:500; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .dok-meta { font-size:0.68rem; color:var(--stone); margin-top:2px; }
 
+    /* ── Mängelfotos ── */
+    .mangel-fotos-wrap { margin-top: 6px; }
+    .mangel-foto-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .mangel-foto-thumb {
+      position: relative;
+      height: 90px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--parchment-dk);
+      background: var(--parchment);
+    }
+    .mangel-foto-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .mangel-foto-del {
+      position: absolute; top: 4px; right: 4px;
+      width: 22px; height: 22px;
+      background: rgba(26,26,26,0.65);
+      border: none; border-radius: 50%;
+      color: white; font-size: 0.7rem;
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      line-height: 1;
+      transition: background 0.15s;
+    }
+    .mangel-foto-del:hover { background: rgba(192,98,42,0.85); }
+    .mangel-foto-add {
+      height: 90px;
+      border: 2px dashed var(--parchment-dk);
+      border-radius: var(--radius-sm);
+      background: var(--parchment);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 5px; cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .mangel-foto-add:hover {
+      border-color: var(--green-soft);
+      background: rgba(74,124,94,0.06);
+    }
+    .mangel-foto-add input[type=file] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
+    }
+    .mangel-foto-add-icon { font-size: 1.3rem; line-height: 1; }
+    .mangel-foto-add-label {
+      font-size: 0.65rem; color: var(--stone);
+      text-align: center; pointer-events: none;
+    }
+    .mangel-foto-count {
+      font-size: 0.72rem; color: var(--green-mid);
+      font-weight: 600; margin-top: 4px;
+    }
+
     /* ── RESPONSIVE ── */
     /* Saison-Label immer ausblenden */
     .sc-season { display: none !important; }
@@ -911,6 +974,11 @@
 
       /* ── Rechner Foto-Zone ── */
       .foto-zone { height: 140px; }
+
+      /* ── Mängelfotos ── */
+      .mangel-foto-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
+      .mangel-foto-thumb { height: 80px; }
+      .mangel-foto-add { height: 80px; }
 
       /* ── Zaehler Verlauf-Rows ── */
       .zaehler-verlauf-row {
@@ -2432,7 +2500,13 @@ function openModal(type, prefill) {
       <div class="form-group"><label>Kunde / Mieter</label>${personSelectHTML('m-meldperson','— Allgemein / anonym —')}</div>
       <div class="form-group"><label>Priorität</label><select id="m-meldprio"><option value="niedrig">Niedrig</option><option value="mittel" selected>Mittel</option><option value="hoch">Hoch</option></select></div>
       <div class="form-group"><label>Beschreibung (optional)</label><textarea id="m-meldbeschr" rows="2" placeholder="Details zur Meldung…"></textarea></div>
+      <div class="form-group">
+        <label>Beweisfotos (optional)</label>
+        <div style="font-size:0.75rem;color:var(--stone);margin-bottom:6px;">Auf dem Handy öffnet sich direkt die Kamera.</div>
+        <div class="mangel-fotos-wrap" id="meld-fotos-wrap"></div>
+      </div>
       <div class="modal-actions"><button class="btn-ghost" onclick="closeModal()">Abbrechen</button><button class="btn-primary" onclick="saveMeldung()">Speichern</button></div>`;
+    setTimeout(() => initMangelFotos('meld-fotos-wrap'), 60);
   }
   document.getElementById('modal').classList.add('open');
   setTimeout(() => mc.querySelector('input')?.focus(), 100);
@@ -2567,7 +2641,8 @@ function saveMeldung() {
   const wohnung = m ? m.wohnung : '—';
   const prio = document.getElementById('m-meldprio').value;
   if (!titel) { showToast('Bitte Titel eingeben'); return; }
-  meldungen.unshift({ id: Date.now(), titel, mieter: mieterVal, wohnung, datum: new Date().toISOString().split('T')[0], prio, status: 'neu' });
+  const meldFotos = _mangelFotos['meld-fotos-wrap'] ? [..._mangelFotos['meld-fotos-wrap']] : [];
+  meldungen.unshift({ id: Date.now(), titel, mieter: mieterVal, wohnung, datum: new Date().toISOString().split('T')[0], prio, status: 'neu', fotos: meldFotos });
   closeModal();
   renderMeldungen();
   saveAll();
@@ -4095,6 +4170,13 @@ function openMeldung(id) {
         </div>
       </div>
       ${m.beschreibung ? `<div style="background:var(--parchment);border-radius:8px;padding:12px 14px;"><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--stone);margin-bottom:6px;">Beschreibung</div><div style="font-size:0.875rem;color:var(--ink);line-height:1.6">${m.beschreibung}</div></div>` : ''}
+      ${m.fotos && m.fotos.length > 0 ? `
+      <div>
+        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--stone);margin-bottom:8px;">📷 Beweisfotos (${m.fotos.length})</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          ${m.fotos.map((src,i) => `<div style="border-radius:8px;overflow:hidden;border:1px solid var(--parchment-dk);height:80px;cursor:pointer;" onclick="window.open('${src}','_blank')" title="Foto ${i+1} in voller Größe"><img src="${src}" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>`).join('')}
+        </div>
+      </div>` : ''}
       <div>
         <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--stone);margin-bottom:8px;">Status ändern</div>
         <div style="display:flex;gap:8px;">
@@ -4217,6 +4299,71 @@ function handleDokUpload(input) {
   renderDokumente();
   saveAll();
   showToast(`${input.files.length} Datei(en) hochgeladen`);
+}
+
+// ═══════════════════════════════════════════════
+// MÄNGELFOTOS — Wiederverwendbare Foto-Komponente
+// ═══════════════════════════════════════════════
+
+// _mangelFotos[containerId] = [ dataURL, ... ]
+const _mangelFotos = {};
+
+function renderMangelFotos(containerId) {
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  const fotos = _mangelFotos[containerId] || [];
+
+  const thumbs = fotos.map((src, i) => `
+    <div class="mangel-foto-thumb">
+      <img src="${src}" />
+      <button class="mangel-foto-del" onclick="delMangelFoto('${containerId}',${i})" title="Foto entfernen">✕</button>
+    </div>
+  `).join('');
+
+  // Hinzufügen-Button — capture="environment" öffnet direkt die Rückkamera auf Mobile
+  const addBtn = `
+    <label class="mangel-foto-add" title="Foto aufnehmen oder auswählen">
+      <input type="file" accept="image/*" capture="environment" multiple
+        onchange="addMangelFotos('${containerId}', this)" />
+      <span class="mangel-foto-add-icon">📷</span>
+      <span class="mangel-foto-add-label">Foto<br>aufnehmen</span>
+    </label>
+  `;
+
+  wrap.innerHTML = `
+    <div class="mangel-foto-grid">
+      ${thumbs}
+      ${addBtn}
+    </div>
+    ${fotos.length > 0 ? `<div class="mangel-foto-count">📎 ${fotos.length} Foto${fotos.length !== 1 ? 's' : ''} als Beweis beigefügt</div>` : ''}
+  `;
+}
+
+function addMangelFotos(containerId, input) {
+  if (!_mangelFotos[containerId]) _mangelFotos[containerId] = [];
+  const files = Array.from(input.files);
+  let loaded = 0;
+  files.forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      _mangelFotos[containerId].push(e.target.result);
+      loaded++;
+      if (loaded === files.length) renderMangelFotos(containerId);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function delMangelFoto(containerId, index) {
+  if (!_mangelFotos[containerId]) return;
+  _mangelFotos[containerId].splice(index, 1);
+  renderMangelFotos(containerId);
+}
+
+function initMangelFotos(containerId, existingFotos) {
+  _mangelFotos[containerId] = existingFotos ? [...existingFotos] : [];
+  renderMangelFotos(containerId);
 }
 
 // ═══════════════════════════════════════════════
@@ -4369,6 +4516,11 @@ function openAbnahmeModal(prefillTaskId) {
         <label>Mängel / Anmerkungen (optional)</label>
         <textarea id="ab-maengel" rows="2" placeholder="z. B. Keine Mängel festgestellt. / Fliese neben Abfluss leicht beschädigt (Vorschaden)."></textarea>
       </div>
+      <div class="form-group">
+        <label>Beweisfotos (optional)</label>
+        <div style="font-size:0.75rem;color:var(--stone);margin-bottom:6px;">Auf dem Handy öffnet sich direkt die Kamera. Mehrere Fotos möglich.</div>
+        <div class="mangel-fotos-wrap" id="ab-fotos-wrap"></div>
+      </div>
       <div class="modal-actions">
         <button class="btn-ghost" onclick="closeModal()">Abbrechen</button>
         <button class="btn-primary" onclick="abnahmeWeiter1()">Weiter → Unterschrift</button>
@@ -4424,6 +4576,8 @@ function openAbnahmeModal(prefillTaskId) {
   `;
   document.getElementById('modal').classList.add('open');
   // Canvas erst nach Render initialisieren (Schritt 2)
+  // Foto-Grid initialisieren
+  setTimeout(() => initMangelFotos('ab-fotos-wrap'), 60);
 }
 
 function _abnahmeSigSteps(step) {
@@ -4452,6 +4606,7 @@ function abnahmeWeiter1() {
     ort:           document.getElementById('ab-ort').value.trim(),
     beschreibung:  document.getElementById('ab-beschreibung').value.trim(),
     maengel:       document.getElementById('ab-maengel').value.trim(),
+    fotos:         _mangelFotos['ab-fotos-wrap'] ? [..._mangelFotos['ab-fotos-wrap']] : [],
   };
   _abnahmeCurrentStep = 2;
   _abnahmeSigSteps(2);
@@ -4544,6 +4699,13 @@ function viewAbnahme(id) {
     </div>
     <div class="form-group" style="margin-bottom:12px;"><label>Durchgeführte Arbeiten</label><textarea rows="3" readonly style="background:var(--parchment);cursor:default;resize:none;">${escHtml(proto.beschreibung || '—')}</textarea></div>
     ${proto.maengel ? `<div class="form-group" style="margin-bottom:12px;"><label>Mängel / Anmerkungen</label><textarea rows="2" readonly style="background:var(--parchment);cursor:default;resize:none;">${escHtml(proto.maengel)}</textarea></div>` : ''}
+    ${proto.fotos && proto.fotos.length > 0 ? `
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--stone);margin-bottom:8px;">Beweisfotos (${proto.fotos.length})</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+        ${proto.fotos.map((src,i) => `<div style="border-radius:8px;overflow:hidden;border:1px solid var(--parchment-dk);height:80px;cursor:pointer;" onclick="window.open('${src}','_blank')"><img src="${src}" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>`).join('')}
+      </div>
+    </div>` : ''}
     ${proto.unterschrift ? `
     <div style="margin-bottom:16px;">
       <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--stone);margin-bottom:6px;">Unterschrift</div>
@@ -4634,6 +4796,16 @@ function _druckAbnahmePDF(proto) {
 ${proto.maengel ? `<div class="section-title">Mängel / Anmerkungen</div>
 <div class="content-box">${escHtmlPlain(proto.maengel)}</div>` : `<div class="section-title">Mängel / Anmerkungen</div>
 <div class="content-box" style="color:#999;font-style:italic;">Keine Mängel festgestellt.</div>`}
+
+${proto.fotos && proto.fotos.length > 0 ? `
+<div class="section-title">Beweisfotos (${proto.fotos.length})</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
+  ${proto.fotos.map((src, i) => `
+  <div style="border:1px solid #ede6d6;border-radius:6px;overflow:hidden;page-break-inside:avoid;">
+    <img src="${src}" style="width:100%;height:120px;object-fit:cover;display:block;" />
+    <div style="font-size:9px;color:#aaa;padding:3px 6px;text-align:center;">Foto ${i+1}</div>
+  </div>`).join('')}
+</div>` : ''}
 
 <div class="sig-section">
   <table style="width:100%;border-collapse:collapse;">
