@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <!-- jsPDF für PDF-Generierung mit Anhang -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -4564,8 +4566,8 @@ function openAbnahmeModal(prefillTaskId) {
             PDF drucken / speichern
           </button>
           <button class="btn-ghost" onclick="abnahmeMailSenden()">
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-            Per E-Mail versenden
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+            PDF anhängen &amp; senden
           </button>
         </div>
         <div style="margin-top:16px;">
@@ -4647,14 +4649,43 @@ function abnahmePDFDrucken() {
   _druckAbnahmePDF(proto);
 }
 
-function abnahmeMailSenden() {
+async function abnahmeMailSenden() {
   const p = _abnahmeFormData;
   if (!p) return;
   const proto = abnahmeProtokolle.find(x => x.id === p.id);
   if (!proto) return;
 
-  const betreff = encodeURIComponent(`Abnahmeprotokoll: ${proto.titel} — ${proto.datum}`);
-  const body = encodeURIComponent(
+  showToast('PDF wird erstellt…');
+  await new Promise(r => setTimeout(r, 80)); // UI-Update abwarten
+
+  try {
+    const blob = await _genAbnahmePDFBlob(proto);
+    const filename = `Abnahmeprotokoll_${proto.datum}_${proto.mieterName.replace(/\s+/g,'_')}.pdf`;
+    const file = new File([blob], filename, { type: 'application/pdf' });
+
+    // ── Mobile: Web Share API → PDF direkt als Anhang ──
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: `Abnahmeprotokoll: ${proto.titel}`,
+        text: `Abnahmeprotokoll vom ${proto.datum}\nMieter: ${proto.mieterName}, Whg. ${proto.wohnung}\n\nErstellt mit Hausmeister Pro.`
+      });
+      return;
+    }
+
+    // ── Desktop-Fallback: PDF herunterladen + mailto öffnen ──
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+    // mailto mit vorausgefülltem Text
+    const hvEmail   = profil.hvEmail || '';
+    const buroEmail = profil.email   || '';
+    const to  = [buroEmail, hvEmail].filter(Boolean).join(',');
+    const cc  = proto.mieterEmail ? encodeURIComponent(proto.mieterEmail) : '';
+    const subj = encodeURIComponent(`Abnahmeprotokoll: ${proto.titel} — ${proto.datum}`);
+    const body = encodeURIComponent(
 `Abnahmeprotokoll — ${proto.datum}
 
 Mieter: ${proto.mieterName}, Wohnung ${proto.wohnung}
@@ -4667,18 +4698,179 @@ ${proto.beschreibung || '—'}
 Mängel / Anmerkungen:
 ${proto.maengel || 'Keine Mängel festgestellt.'}
 
-Das Protokoll wurde digital vom Mieter unterschrieben.
-Erstellt mit Hausmeister Pro.`
+Das Protokoll wurde digital unterschrieben.
+→ PDF im Anhang (automatisch heruntergeladen).
+
+Erstellt mit Hausmeister Pro.`);
+    window.open(`mailto:${to}?subject=${subj}&body=${body}${cc?`&cc=${cc}`:''}`, '_blank');
+    showToast('PDF heruntergeladen — bitte als Anhang einfügen');
+
+  } catch(e) {
+    if (e.name !== 'AbortError') showToast('Fehler beim Erstellen: ' + e.message);
+  }
+}
+
+async function _genAbnahmePDFBlob(proto) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+  const W = 210, margin = 18, cw = W - margin * 2;
+  let y = margin;
+
+  const green  = [26, 58, 42];
+  const stone  = [122, 116, 104];
+  const cream  = [245, 240, 232];
+  const ink    = [30, 28, 24];
+
+  // ── Header-Balken ──
+  doc.setFillColor(...green);
+  doc.rect(0, 0, W, 22, 'F');
+
+  // Firmenname / Logo-Text
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(245, 240, 232);
+  doc.text(profil.firma || 'Hausmeister Pro', margin, 14);
+
+  // "Abnahmeprotokoll" rechts
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Abnahmeprotokoll', W - margin, 14, { align: 'right' });
+  y = 30;
+
+  // ── Status-Badge ──
+  if (proto.unterschrift) {
+    doc.setFillColor(74, 124, 94);
+    doc.roundedRect(margin, y - 5, 48, 7, 2, 2, 'F');
+    doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
+    doc.setTextColor(245, 240, 232);
+    doc.text('✓ DIGITAL UNTERSCHRIEBEN', margin + 24, y, { align: 'center' });
+    y += 8;
+  }
+
+  // ── Meta-Box ──
+  doc.setFillColor(...cream);
+  doc.roundedRect(margin, y, cw, 28, 3, 3, 'F');
+  doc.setDrawColor(...[212, 201, 176]);
+  doc.roundedRect(margin, y, cw, 28, 3, 3, 'S');
+
+  const col = cw / 4;
+  [
+    ['Mieter', proto.mieterName],
+    ['Wohnung', proto.wohnung],
+    ['Datum', proto.datum],
+    ['Ort', proto.ort || '—'],
+  ].forEach(([lbl, val], i) => {
+    const x = margin + i * col + 4;
+    doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(...stone);
+    doc.text(lbl.toUpperCase(), x, y + 8);
+    doc.setFontSize(9.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(...ink);
+    doc.text(String(val), x, y + 16);
+  });
+  y += 34;
+
+  // ── Betreff ──
+  doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(...stone);
+  doc.text('BETREFF', margin, y); y += 5;
+  doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green);
+  const titLines = doc.splitTextToSize(proto.titel, cw);
+  doc.text(titLines, margin, y); y += titLines.length * 6 + 4;
+
+  // ── Hilfsfunktion: Textblock ──
+  function textBlock(label, content) {
+    if (!content) return;
+    doc.setDrawColor(...[212, 201, 176]);
+    doc.setFillColor(253, 250, 245);
+    const lines = doc.splitTextToSize(content, cw - 8);
+    const bh = lines.length * 5.5 + 14;
+    if (y + bh > 270) { doc.addPage(); y = margin; }
+    doc.roundedRect(margin, y, cw, bh, 2, 2, 'FD');
+    doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(...stone);
+    doc.text(label.toUpperCase(), margin + 4, y + 7);
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(...ink);
+    doc.text(lines, margin + 4, y + 13);
+    y += bh + 5;
+  }
+
+  textBlock('Durchgeführte Arbeiten', proto.beschreibung || '—');
+  textBlock('Mängel / Anmerkungen', proto.maengel || 'Keine Mängel festgestellt.');
+
+  // ── Dokumentationsfotos ──
+  if (proto.fotos && proto.fotos.length > 0) {
+    if (y + 14 > 265) { doc.addPage(); y = margin; }
+    doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(...stone);
+    doc.text(`DOKUMENTATIONSFOTOS (${proto.fotos.length})`, margin, y + 5); y += 10;
+
+    const fotoW = (cw - 8) / 3, fotoH = fotoW * 0.65;
+    for (let i = 0; i < proto.fotos.length; i++) {
+      const col = i % 3, row = Math.floor(i / 3);
+      if (col === 0 && row > 0) y += fotoH + 4;
+      if (y + fotoH > 272) { doc.addPage(); y = margin; }
+      const fx = margin + col * (fotoW + 4);
+      try {
+        const fmt = proto.fotos[i].startsWith('data:image/png') ? 'PNG' : 'JPEG';
+        doc.addImage(proto.fotos[i], fmt, fx, y, fotoW, fotoH, '', 'FAST');
+        doc.setDrawColor(...[212, 201, 176]);
+        doc.rect(fx, y, fotoW, fotoH, 'S');
+        doc.setFontSize(6.5); doc.setTextColor(...stone);
+        doc.text(`Foto ${i+1}`, fx + fotoW/2, y + fotoH + 3.5, { align: 'center' });
+      } catch(_) {}
+    }
+    y += fotoH + 10;
+  }
+
+  // ── Unterschrift ──
+  if (y + 50 > 272) { doc.addPage(); y = margin; }
+  doc.setDrawColor(...green); doc.setLineWidth(0.6);
+  doc.line(margin, y, W - margin, y); y += 6;
+
+  doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(...stone);
+  doc.text('UNTERSCHRIFTEN', margin, y); y += 8;
+
+  const halfW = (cw - 10) / 2;
+
+  // Hausmeister links
+  doc.setFillColor(...cream);
+  doc.roundedRect(margin, y, halfW, 36, 2, 2, 'F');
+  doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(...stone);
+  doc.text('HAUSMEISTER', margin + 4, y + 7);
+  if (profil.vorname || profil.nachname) {
+    doc.setFontSize(8.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...ink);
+    doc.text(`${profil.vorname||''} ${profil.nachname||''}`.trim(), margin + 4, y + 15);
+  }
+  doc.setDrawColor(...stone); doc.setLineWidth(0.3);
+  doc.line(margin + 4, y + 30, margin + halfW - 4, y + 30);
+  doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(...stone);
+  doc.text('Unterschrift / Stempel', margin + 4, y + 34);
+
+  // Mieter rechts
+  const rx = margin + halfW + 10;
+  doc.setFillColor(...cream);
+  doc.roundedRect(rx, y, halfW, 36, 2, 2, 'F');
+  doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(...stone);
+  doc.text(`MIETER — ${proto.mieterName.toUpperCase()}`, rx + 4, y + 7);
+
+  if (proto.unterschrift) {
+    try {
+      doc.addImage(proto.unterschrift, 'PNG', rx + 4, y + 9, halfW - 8, 18, '', 'FAST');
+    } catch(_) {}
+    doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(...stone);
+    doc.text(`Digital unterschrieben · ${proto.datum}`, rx + 4, y + 33);
+  } else {
+    doc.setDrawColor(...stone); doc.setLineWidth(0.3);
+    doc.line(rx + 4, y + 30, rx + halfW - 4, y + 30);
+    doc.setFontSize(7); doc.setTextColor(...stone);
+    doc.text(`Unterschrift Mieter · ${proto.datum}`, rx + 4, y + 34);
+  }
+  y += 42;
+
+  // ── Footer ──
+  doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(...stone);
+  doc.text(
+    `Erstellt mit Hausmeister Pro · ${proto.datum}${profil.firma ? ' · ' + profil.firma : ''}`,
+    W / 2, 290, { align: 'center' }
   );
 
-  // Hausverwaltungs-E-Mail aus Einstellungen oder Fallback
-  const hvEmail = profil.hvEmail || profil.email || '';
-  const buroEmail = profil.email || '';
-  const to = [buroEmail, hvEmail].filter(Boolean).join(',');
-  const cc = proto.mieterEmail ? encodeURIComponent(proto.mieterEmail) : '';
-  const mailtoUrl = `mailto:${to}?subject=${betreff}&body=${body}${cc ? `&cc=${cc}` : ''}`;
-  window.open(mailtoUrl, '_blank');
-  showToast('E-Mail-Programm geöffnet');
+  return doc.output('blob');
 }
 
 function viewAbnahme(id) {
@@ -4718,7 +4910,7 @@ function viewAbnahme(id) {
       <button class="btn-danger" onclick="deleteAbnahme(${proto.id})">Löschen</button>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn-ghost" onclick="closeModal()">Schließen</button>
-        ${proto.unterschrift ? `<button class="btn-ghost" onclick="_abnahmeFormData=abnahmeProtokolle.find(x=>x.id===${proto.id});abnahmeMailSenden()">✉ E-Mail</button>
+        ${proto.unterschrift ? `<button class="btn-ghost" onclick="_abnahmeFormData=abnahmeProtokolle.find(x=>x.id===${proto.id});abnahmeMailSenden()">📎 Senden</button>
         <button class="btn-primary" onclick="_abnahmeFormData=abnahmeProtokolle.find(x=>x.id===${proto.id});_druckAbnahmePDF(abnahmeProtokolle.find(x=>x.id===${proto.id}))">🖨 PDF</button>` : ''}
       </div>
     </div>
