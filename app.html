@@ -5168,7 +5168,7 @@ const authTimeout = setTimeout(() => {
     <button onclick="location.reload()" style="margin-top:16px;padding:10px 24px;background:#2d5a3d;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.9rem;">Neu laden</button>
     <button onclick="firebase.auth().signOut().then(()=>location.href='login.html')" style="margin-top:8px;padding:8px 20px;background:none;color:#7a7468;border:1px solid #d4c9b0;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.85rem;">Abmelden</button>
   `;
-}, 10000);
+}, 6000);
 
 auth.onAuthStateChanged(async user => {
   clearTimeout(authTimeout);

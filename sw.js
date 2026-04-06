@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════
 // HAUSMEISTER PRO — Service Worker
 // ═══════════════════════════════════════════════
-const CACHE_NAME = 'hausmeister-pro-v1';
+const CACHE_NAME = 'hausmeister-pro-v2';
 const OFFLINE_URL = '/offline.html';
 
 // Dateien die sofort gecacht werden
