@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auftragsverarbeitungsvertrag (AVV) — Hausmeister Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-deep: #1a3a2a;
+      --green-mid:  #2d5a3d;
+      --green-soft: #4a7c5e;
+      --green-pale: #a8c5b0;
+      --cream:      #f5f0e8;
+      --parchment:  #ede6d6;
+      --parchment-dk: #d4c9b0;
+      --stone:      #7a7468;
+      --ink:        #1e1c18;
+      --white:      #fdfaf5;
+      --terra:      #c0622a;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+
+    .top-bar {
+      background: var(--green-deep);
+      padding: 14px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .top-bar-logo { font-family: 'Cormorant Garant', serif; font-size: 1.1rem; font-weight: 700; color: var(--cream); }
+    .top-bar-logo span { font-style: italic; color: var(--green-pale); font-weight: 400; }
+    .top-bar a { font-size: 0.82rem; color: var(--green-pale); text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    .top-bar a:hover { color: var(--cream); }
+
+    .container { max-width: 780px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    .doc-header { margin-bottom: 40px; padding-bottom: 24px; border-bottom: 2px solid var(--parchment-dk); }
+    .doc-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green-soft); margin-bottom: 10px; }
+    .doc-title { font-family: 'Cormorant Garant', serif; font-size: 2.6rem; font-weight: 700; color: var(--green-deep); line-height: 1.1; margin-bottom: 10px; }
+    .doc-meta { font-size: 0.82rem; color: var(--stone); }
+
+    h2 { font-family: 'Cormorant Garant', serif; font-size: 1.45rem; font-weight: 700; color: var(--green-deep); margin: 36px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--parchment-dk); }
+    h3 { font-size: 0.95rem; font-weight: 600; color: var(--green-mid); margin: 18px 0 8px; }
+    p { font-size: 0.9rem; line-height: 1.75; color: var(--ink); margin-bottom: 12px; }
+    ul { padding-left: 20px; margin-bottom: 12px; }
+    li { font-size: 0.9rem; line-height: 1.75; color: var(--ink); margin-bottom: 4px; }
+    a { color: var(--green-soft); }
+    a:hover { color: var(--green-deep); }
+
+    .info-box { background: var(--white); border: 1px solid var(--parchment-dk); border-radius: 12px; padding: 18px 22px; margin: 16px 0; font-size: 0.875rem; line-height: 1.7; }
+    .info-box strong { display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--stone); margin-bottom: 6px; }
+
+    .highlight { background: rgba(74,124,94,0.08); border-left: 3px solid var(--green-soft); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 16px 0; font-size: 0.875rem; }
+
+    .para-num { font-family: 'Cormorant Garant', serif; font-size: 1.1rem; font-weight: 700; color: var(--green-deep); margin-right: 6px; }
+
+    .back-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--green-mid); color: var(--cream); border: none; border-radius: 8px; padding: 10px 20px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500; cursor: pointer; text-decoration: none; margin-top: 32px; transition: background 0.15s; }
+    .back-btn:hover { background: var(--green-deep); color: var(--cream); }
+
+    @media (max-width: 600px) {
+      .container { padding: 28px 16px 60px; }
+      .doc-title { font-size: 1.9rem; }
+      .top-bar { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-logo">Hausmeister <span>Pro</span></div>
+  <a href="login.html">← Zurück zum Login</a>
+</div>
+
+<div class="container">
+  <div class="doc-header">
+    <div class="doc-eyebrow">Rechtliches Dokument · Art. 28 DSGVO</div>
+    <div class="doc-title">Auftrags&shy;verarbeitungs&shy;vertrag</div>
+    <div class="doc-meta">Stand: April 2026 &nbsp;·&nbsp; Zwischen Hausmeister Pro (Auftragsverarbeiter) und dem Nutzer (Verantwortlicher)</div>
+  </div>
+
+  <div class="highlight">
+    <strong>Wann gilt dieser Vertrag?</strong> Dieser AVV gilt automatisch ab dem Zeitpunkt der Registrierung, sobald der Nutzer personenbezogene Daten Dritter (z. B. Namen, Telefonnummern oder E-Mails von Mietern) in Hausmeister Pro eingibt. Er ist Bestandteil der Nutzungsbedingungen.
+  </div>
+
+  <!-- Präambel -->
+  <h2>Präambel</h2>
+  <p>Dieser Auftragsverarbeitungsvertrag (nachfolgend „AVV") wird geschlossen zwischen:</p>
+
+  <div class="info-box">
+    <strong>Auftragsverarbeiter (Anbieter)</strong>
+    Hausmeister Pro · [Vollständiger Name des Anbieters] · [Adresse] · [E-Mail]<br>
+    — nachfolgend „Auftragsverarbeiter" oder „Anbieter" —
+  </div>
+  <div class="info-box">
+    <strong>Verantwortlicher (Kunde)</strong>
+    Der bei der Registrierung angegebene Nutzer des Dienstes Hausmeister Pro<br>
+    — nachfolgend „Verantwortlicher" oder „Kunde" —
+  </div>
+
+  <p>Der Verantwortliche betreibt im Rahmen seiner gewerblichen Tätigkeit (Hausverwaltung, Hausmeisterdienst o. ä.) die Verwaltung personenbezogener Daten seiner Mieter, Kunden und Geschäftspartner. Der Auftragsverarbeiter stellt hierfür die technische SaaS-Plattform „Hausmeister Pro" bereit.</p>
+
+  <!-- §1 -->
+  <h2><span class="para-num">§ 1</span> Gegenstand und Dauer</h2>
+  <p><strong>Gegenstand:</strong> Der Auftragsverarbeiter verarbeitet personenbezogene Daten im Auftrag des Verantwortlichen zum Zweck der Bereitstellung der Hausmeister-Pro-Anwendung (Aufgabenverwaltung, Mieterverwaltung, Protokollführung, Rechnungsstellung, Zählerstände, Abnahmeprotokolle).</p>
+  <p><strong>Dauer:</strong> Die Auftragsverarbeitung beginnt mit der Registrierung und endet mit der Kündigung des Kontos. Nach Vertragsende werden alle Daten gemäß § 9 dieses AVV gelöscht.</p>
+
+  <!-- §2 -->
+  <h2><span class="para-num">§ 2</span> Art und Zweck der Verarbeitung</h2>
+  <h3>Verarbeitete Datenkategorien:</h3>
+  <ul>
+    <li>Stammdaten von Mietern und Kunden (Name, Adresse, Telefon, E-Mail)</li>
+    <li>Vertragsdaten (Mietbeginn, Wohnungsbezeichnung)</li>
+    <li>Finanzdaten (IBAN, Bankverbindung für Rechnungen)</li>
+    <li>Protokolldaten (Arbeitsberichte, Zählerstände, Abnahmeprotokolle)</li>
+    <li>Biometrische Daten eingeschränkter Art (digitale Unterschriften als Bilddatei)</li>
+    <li>Kommunikationsdaten (E-Mail-Adressen für Versand von Protokollen)</li>
+  </ul>
+  <h3>Betroffene Personengruppen:</h3>
+  <ul>
+    <li>Mieter und Bewohner der vom Kunden verwalteten Objekte</li>
+    <li>Kunden und Auftraggeber des Kunden (externe Hausverwaltungen, Unternehmen)</li>
+  </ul>
+  <h3>Zweck der Verarbeitung:</h3>
+  <p>Ausschließlich zur technischen Bereitstellung der Hausmeister-Pro-Funktionen. Eine Nutzung für eigene Zwecke des Auftragsverarbeiters (Werbung, Weitergabe, Analyse) ist ausgeschlossen.</p>
+
+  <!-- §3 -->
+  <h2><span class="para-num">§ 3</span> Pflichten des Auftragsverarbeiters</h2>
+  <p>Der Auftragsverarbeiter verpflichtet sich:</p>
+  <ul>
+    <li>Daten ausschließlich nach dokumentierter Weisung des Verantwortlichen zu verarbeiten</li>
+    <li>Zur Verschwiegenheit über alle verarbeiteten Daten (auch nach Vertragsende)</li>
+    <li>Alle technischen und organisatorischen Maßnahmen gemäß Art. 32 DSGVO zu treffen (siehe § 6)</li>
+    <li>Den Verantwortlichen unverzüglich (spätestens 72 Stunden) über Datenschutzverletzungen zu informieren</li>
+    <li>Zur Unterstützung bei der Umsetzung von Betroffenenrechten (Auskunft, Löschung, Berichtigung)</li>
+    <li>Alle erforderlichen Informationen zur Nachweisführung bereitzustellen</li>
+    <li>Daten nicht in Drittländer außerhalb der EU/EWR zu übertragen, ohne geeignete Garantien</li>
+  </ul>
+
+  <!-- §4 -->
+  <h2><span class="para-num">§ 4</span> Pflichten des Verantwortlichen</h2>
+  <p>Der Verantwortliche verpflichtet sich:</p>
+  <ul>
+    <li>Die Rechtmäßigkeit der Datenverarbeitung gegenüber betroffenen Personen (Mietern) sicherzustellen</li>
+    <li>Betroffene Personen über die Verwendung von Hausmeister Pro im Rahmen ihrer Datenschutzerklärung zu informieren</li>
+    <li>Nur Daten zu speichern, für deren Verarbeitung eine Rechtsgrundlage vorliegt</li>
+    <li>Den Auftragsverarbeiter über Änderungen der Verarbeitungszwecke zu informieren</li>
+    <li>Zugangsdaten (Passwort) sicher aufzubewahren</li>
+  </ul>
+
+  <!-- §5 -->
+  <h2><span class="para-num">§ 5</span> Weisungsrecht</h2>
+  <p>Der Verantwortliche hat das Recht, dem Auftragsverarbeiter jederzeit Weisungen zur Verarbeitung seiner Daten zu erteilen. Weisungen zur Datenlöschung, zum Datenexport oder zur Berichtigung können über die App-Einstellungen oder per E-Mail an den Anbieter übermittelt werden.</p>
+  <p>Hält der Auftragsverarbeiter eine Weisung für rechtswidrig, informiert er den Verantwortlichen unverzüglich. Die Verarbeitung wird bis zur Klärung ausgesetzt.</p>
+
+  <!-- §6 -->
+  <h2><span class="para-num">§ 6</span> Technische und organisatorische Maßnahmen (TOM)</h2>
+  <p>Der Auftragsverarbeiter hat folgende Maßnahmen gemäß Art. 32 DSGVO implementiert:</p>
+  <h3>Vertraulichkeit</h3>
+  <ul>
+    <li>Verschlüsselung aller Datenübertragungen via TLS 1.2 / 1.3</li>
+    <li>Verschlüsselung aller gespeicherten Daten (AES-256 durch Google Firebase)</li>
+    <li>Strikte Zugriffskontrolle: Jeder Nutzer sieht ausschließlich seine eigenen Daten (Firebase Security Rules)</li>
+    <li>Passwörter werden ausschließlich als Hashwert gespeichert (Firebase Authentication)</li>
+  </ul>
+  <h3>Integrität</h3>
+  <ul>
+    <li>Datenintegrität durch Firestore-Transaktionen und Validierungsregeln</li>
+    <li>Regelmäßige automatische Backups durch Google Firebase</li>
+  </ul>
+  <h3>Verfügbarkeit</h3>
+  <ul>
+    <li>Serverstandort: <strong>europe-west10 (Berlin, Deutschland)</strong> — innerhalb der EU</li>
+    <li>SLA-Verfügbarkeit gemäß Google Firebase: 99,95 %</li>
+    <li>Georedundante Datenspeicherung durch Google</li>
+  </ul>
+  <h3>Organisatorisch</h3>
+  <ul>
+    <li>Zugangsdaten zu Produktionssystemen nur für autorisierte Personen</li>
+    <li>Regelmäßige Überprüfung der Security Rules</li>
+    <li>Dokumentiertes Verfahren bei Datenschutzverletzungen</li>
+  </ul>
+
+  <!-- §7 -->
+  <h2><span class="para-num">§ 7</span> Unterauftragnehmer</h2>
+  <p>Der Auftragsverarbeiter setzt folgende Unterauftragnehmer ein, deren Einsatz der Verantwortliche mit Abschluss dieses AVV genehmigt:</p>
+  <div class="info-box">
+    <strong>Google Ireland Limited</strong>
+    Gordon House, Barrow Street, Dublin 4, Irland<br>
+    Dienste: Firebase Authentication (Nutzerverwaltung), Cloud Firestore (Datenbankhosting)<br>
+    Serverstandort: europe-west10 (Berlin, Deutschland)<br>
+    Zertifizierungen: ISO 27001, ISO 27017, ISO 27018, SOC 1/2/3<br>
+    AVV mit Google: <a href="https://firebase.google.com/terms/data-processing-terms" target="_blank" rel="noopener">firebase.google.com/terms/data-processing-terms</a>
+  </div>
+  <p>Bei Änderungen oder Hinzufügung von Unterauftragnehmern informiert der Auftragsverarbeiter den Verantwortlichen mindestens 14 Tage im Voraus per E-Mail. Der Verantwortliche kann der Änderung widersprechen.</p>
+
+  <!-- §8 -->
+  <h2><span class="para-num">§ 8</span> Rechte betroffener Personen</h2>
+  <p>Ersuchen betroffener Personen (Mieter) zur Ausübung ihrer Rechte (Auskunft, Löschung, Berichtigung) sind primär an den Verantwortlichen zu richten, da dieser der datenschutzrechtlich Verantwortliche ist.</p>
+  <p>Soweit eine technische Unterstützung durch den Auftragsverarbeiter erforderlich ist (z. B. vollständige Datenlöschung aus der Datenbank), wird diese auf Anfrage des Verantwortlichen innerhalb von 5 Werktagen umgesetzt.</p>
+
+  <!-- §9 -->
+  <h2><span class="para-num">§ 9</span> Löschung nach Vertragsende</h2>
+  <p>Nach Kündigung des Kontos durch den Nutzer:</p>
+  <ul>
+    <li>Sofortige Deaktivierung des Zugangs</li>
+    <li>Vollständige und unwiderrufliche Löschung aller Daten aus dem Firestore-Dokument innerhalb von <strong>30 Tagen</strong></li>
+    <li>Schriftliche Bestätigung der Löschung auf Anfrage</li>
+  </ul>
+  <p>Ausnahme: Daten, die der Verantwortliche aufgrund gesetzlicher Aufbewahrungspflichten (z. B. § 147 AO für Rechnungen: 10 Jahre) selbst exportiert und aufbewahren muss, liegen nach dem Export in seiner eigenen Verantwortung.</p>
+
+  <!-- §10 -->
+  <h2><span class="para-num">§ 10</span> Haftung</h2>
+  <p>Die Haftung richtet sich nach den gesetzlichen Vorschriften (Art. 82 DSGVO). Im Innenverhältnis haftet jede Partei für Schäden, die durch schuldhaften Verstoß gegen diesen AVV entstehen. Der Auftragsverarbeiter haftet nicht für Schäden, die durch fehlerhafte oder rechtswidrige Weisungen des Verantwortlichen entstehen.</p>
+
+  <!-- §11 -->
+  <h2><span class="para-num">§ 11</span> Schlussbestimmungen</h2>
+  <p><strong>Anwendbares Recht:</strong> Deutsches Recht unter Ausschluss des UN-Kaufrechts.</p>
+  <p><strong>Vorrang:</strong> Im Falle von Widersprüchen zwischen diesem AVV und anderen Vereinbarungen hat dieser AVV Vorrang in datenschutzrechtlichen Fragen.</p>
+  <p><strong>Salvatorische Klausel:</strong> Sollten einzelne Bestimmungen dieses AVV unwirksam sein, bleibt der Vertrag im Übrigen wirksam.</p>
+  <p><strong>Schriftform:</strong> Änderungen dieses AVV bedürfen der Textform. Die Nutzung der App nach Bekanntmachung einer Änderung gilt als Zustimmung.</p>
+  <p><strong>Inkrafttreten:</strong> Dieser AVV tritt mit der Registrierung / dem Akzeptieren der Bedingungen in Kraft.</p>
+
+  <div style="margin-top:40px;padding-top:24px;border-top:1px solid var(--parchment-dk);display:flex;gap:12px;flex-wrap:wrap;">
+    <a class="back-btn" href="login.html">← Zurück zum Login</a>
+    <a class="back-btn" href="datenschutz.html" style="background:var(--white);color:var(--green-mid);border:1px solid var(--parchment-dk);">Datenschutzerklärung lesen →</a>
+  </div>
+</div>
+
+</body>
+</html>

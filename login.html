@@ -264,6 +264,47 @@
     .panel { display: none; }
     .panel.active { display: block; }
 
+    /* AVV-Checkbox */
+    .avv-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      background: rgba(74,124,94,0.06);
+      border: 1px solid rgba(74,124,94,0.18);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .avv-row input[type=checkbox] {
+      width: 18px; height: 18px;
+      flex-shrink: 0; margin-top: 1px;
+      accent-color: var(--green-mid);
+      cursor: pointer;
+    }
+    .avv-row label {
+      font-size: 0.82rem;
+      color: var(--stone);
+      line-height: 1.5;
+      cursor: pointer;
+    }
+    .avv-row label a {
+      color: var(--green-soft);
+      text-decoration: underline;
+      font-weight: 500;
+    }
+    .avv-row label a:hover { color: var(--green-deep); }
+    .avv-row.unchecked {
+      border-color: rgba(192,98,42,0.35);
+      background: rgba(192,98,42,0.05);
+      animation: shake 0.3s ease;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
     @media (max-width: 720px) {
       body { flex-direction: column; }
       .left { width: 100%; padding: 32px 24px; flex-direction: row; align-items: center; justify-content: space-between; }
@@ -343,6 +384,14 @@
       <div class="field">
         <label>Passwort wiederholen</label>
         <input type="password" id="reg-pw2" placeholder="••••••••" autocomplete="new-password" />
+      </div>
+      <div class="avv-row" id="avv-row" onclick="document.getElementById('avv-check').click()">
+        <input type="checkbox" id="avv-check" onclick="event.stopPropagation()" />
+        <label for="avv-check" onclick="event.stopPropagation()">
+          Ich akzeptiere den <a href="avv.html" target="_blank" onclick="event.stopPropagation()">Auftragsverarbeitungsvertrag (AVV)</a>
+          und habe die <a href="datenschutz.html" target="_blank" onclick="event.stopPropagation()">Datenschutzerklärung</a> gelesen.
+          Mir ist bekannt, dass ich als Nutzer für die Daten meiner Mieter datenschutzrechtlich verantwortlich bin.
+        </label>
       </div>
       <button class="btn-submit" id="btn-reg" onclick="doRegister()">
         <span id="reg-label">Konto erstellen</span>
@@ -428,6 +477,14 @@
     if (!email || !pw) { showError('reg-error', 'Bitte alle Felder ausfüllen.'); return; }
     if (pw !== pw2)    { showError('reg-error', 'Passwörter stimmen nicht überein.'); return; }
     if (pw.length < 6) { showError('reg-error', 'Passwort muss mindestens 6 Zeichen haben.'); return; }
+    const avv = document.getElementById('avv-check');
+    if (!avv.checked) {
+      const row = document.getElementById('avv-row');
+      row.classList.add('unchecked');
+      setTimeout(() => row.classList.remove('unchecked'), 600);
+      showError('reg-error', 'Bitte AVV und Datenschutzerklärung akzeptieren.');
+      return;
+    }
     setLoading('reg', true);
     try {
       await auth.createUserWithEmailAndPassword(email, pw);
