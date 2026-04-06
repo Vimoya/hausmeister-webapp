@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Icon Generator</title></head>
+<body style="font-family:sans-serif;padding:24px;background:#f5f0e8;">
+<h2>Hausmeister Pro — Icon Generator</h2>
+<p>Klick auf "Alle Icons herunterladen" — danach alle PNG-Dateien in diesen <code>/icons/</code> Ordner legen.</p>
+<button onclick="generateAll()" style="background:#1a3a2a;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:1rem;cursor:pointer;margin-bottom:24px;">⬇ Alle Icons herunterladen</button>
+<div id="preview" style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;"></div>
+
+<script>
+const SIZES = [72, 96, 128, 144, 152, 192, 384, 512];
+
+function drawIcon(size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const s = size;
+
+  // Hintergrund — abgerundetes Rechteck
+  const r = s * 0.22;
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  ctx.lineTo(s - r, 0);
+  ctx.quadraticCurveTo(s, 0, s, r);
+  ctx.lineTo(s, s - r);
+  ctx.quadraticCurveTo(s, s, s - r, s);
+  ctx.lineTo(r, s);
+  ctx.quadraticCurveTo(0, s, 0, s - r);
+  ctx.lineTo(0, r);
+  ctx.quadraticCurveTo(0, 0, r, 0);
+  ctx.closePath();
+
+  // Gradient Hintergrund
+  const grad = ctx.createLinearGradient(0, 0, 0, s);
+  grad.addColorStop(0, '#2d5a3d');
+  grad.addColorStop(1, '#1a3a2a');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Subtile Textur
+  ctx.fillStyle = 'rgba(168,197,176,0.04)';
+  ctx.beginPath();
+  ctx.ellipse(s * 0.75, s * 0.2, s * 0.5, s * 0.4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  const cx = s / 2;
+
+  // Blatt / Pflanze Zeichnen
+  const lh = s * 0.48; // Höhe des Blatts
+  const lw = s * 0.22; // Breite
+  const ly = s * 0.18; // oben
+  const lx = cx;
+
+  // Blatt-Form
+  ctx.beginPath();
+  ctx.moveTo(lx, ly);
+  ctx.bezierCurveTo(lx + lw, ly + lh * 0.2, lx + lw, ly + lh * 0.7, lx, ly + lh);
+  ctx.bezierCurveTo(lx - lw, ly + lh * 0.7, lx - lw, ly + lh * 0.2, lx, ly);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(168,197,176,0.18)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(168,197,176,0.7)';
+  ctx.lineWidth = s * 0.025;
+  ctx.stroke();
+
+  // Inneres Blatt
+  const ilh = lh * 0.55, ilw = lw * 0.55, ily = ly + lh * 0.15;
+  ctx.beginPath();
+  ctx.moveTo(lx, ily);
+  ctx.bezierCurveTo(lx + ilw, ily + ilh * 0.2, lx + ilw, ily + ilh * 0.7, lx, ily + ilh);
+  ctx.bezierCurveTo(lx - ilw, ily + ilh * 0.7, lx - ilw, ily + ilh * 0.2, lx, ily);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(168,197,176,0.25)';
+  ctx.fill();
+
+  // Mittelader
+  ctx.beginPath();
+  ctx.moveTo(lx, ly);
+  ctx.lineTo(lx, ly + lh);
+  ctx.strokeStyle = 'rgba(168,197,176,0.6)';
+  ctx.lineWidth = s * 0.018;
+  ctx.stroke();
+
+  // Seitenaderln
+  [0.3, 0.5, 0.7].forEach(t => {
+    const ay = ly + lh * t;
+    const ax = lx + lw * (1 - Math.abs(t - 0.5) * 1.5) * 0.65;
+    ctx.beginPath();
+    ctx.moveTo(lx, ay);
+    ctx.lineTo(ax, ay - lh * 0.06);
+    ctx.strokeStyle = 'rgba(168,197,176,0.4)';
+    ctx.lineWidth = s * 0.012;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(lx, ay);
+    ctx.lineTo(lx - (ax - lx), ay - lh * 0.06);
+    ctx.stroke();
+  });
+
+  // Stamm unten
+  ctx.beginPath();
+  ctx.moveTo(lx, ly + lh);
+  ctx.lineTo(lx, s * 0.84);
+  ctx.strokeStyle = 'rgba(168,197,176,0.55)';
+  ctx.lineWidth = s * 0.022;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Boden-Linie
+  ctx.beginPath();
+  ctx.moveTo(lx - s * 0.18, s * 0.84);
+  ctx.lineTo(lx + s * 0.18, s * 0.84);
+  ctx.strokeStyle = 'rgba(168,197,176,0.4)';
+  ctx.lineWidth = s * 0.018;
+  ctx.stroke();
+
+  // "H" Buchstabe unten — nur ab 128px
+  if (size >= 128) {
+    ctx.font = `bold ${s * 0.13}px Arial`;
+    ctx.fillStyle = 'rgba(168,197,176,0.5)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('PRO', cx, s * 0.97);
+  }
+
+  return canvas;
+}
+
+function generateAll() {
+  const preview = document.getElementById('preview');
+  preview.innerHTML = '';
+  SIZES.forEach(size => {
+    const canvas = drawIcon(size);
+    preview.appendChild(canvas);
+
+    // Download
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `icon-${size}.png`;
+    a.click();
+  });
+
+  // Screenshot placeholder
+  setTimeout(() => {
+    alert('Icons heruntergeladen!\n\nAlle icon-XXX.png Dateien in den Ordner /icons/ legen.\n\nFür den Screenshot (screenshot-mobile.png) mach einen Screenshot deiner App auf dem Handy und benenne ihn screenshot-mobile.png.');
+  }, 500);
+}
+
+// Vorschau beim Laden
+window.onload = () => {
+  const preview = document.getElementById('preview');
+  SIZES.forEach(size => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'text-align:center;';
+    const canvas = drawIcon(size);
+    canvas.style.cssText = `width:${Math.min(size,96)}px;height:${Math.min(size,96)}px;border-radius:${Math.min(size,96)*0.22}px;`;
+    wrap.appendChild(canvas);
+    wrap.innerHTML += `<div style="font-size:11px;color:#666;margin-top:4px;">${size}×${size}</div>`;
+    preview.appendChild(wrap);
+  });
+};
+</script>
+</body>
+</html>

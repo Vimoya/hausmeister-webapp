@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline — Hausmeister Pro</title>
+  <style>
+    :root { --green: #1a3a2a; --cream: #f5f0e8; --stone: #7a7468; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--green);
+      color: var(--cream);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; text-align: center;
+    }
+    .wrap { max-width: 320px; }
+    .icon { font-size: 3.5rem; margin-bottom: 20px; }
+    h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 10px; }
+    p { font-size: 0.9rem; color: rgba(245,240,232,0.65); line-height: 1.6; margin-bottom: 28px; }
+    button {
+      background: rgba(168,197,176,0.15);
+      border: 1px solid rgba(168,197,176,0.3);
+      color: var(--cream); border-radius: 10px;
+      padding: 12px 28px; font-size: 0.9rem;
+      cursor: pointer; font-family: inherit;
+      transition: background 0.15s;
+    }
+    button:hover { background: rgba(168,197,176,0.25); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="icon">📡</div>
+    <h1>Keine Verbindung</h1>
+    <p>Hausmeister Pro benötigt eine Internetverbindung für Echtzeit-Daten.<br>Bitte Verbindung prüfen und erneut versuchen.</p>
+    <button onclick="location.reload()">↺ Erneut versuchen</button>
+  </div>
+</body>
+</html>

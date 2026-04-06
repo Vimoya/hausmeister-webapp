@@ -11,8 +11,10 @@ const mime = {
   '.json': 'application/json',
   '.png':  'image/png',
   '.jpg':  'image/jpeg',
+  '.jpeg': 'image/jpeg',
   '.svg':  'image/svg+xml',
   '.ico':  'image/x-icon',
+  '.webp': 'image/webp',
 };
 
 http.createServer((req, res) => {
@@ -32,7 +34,12 @@ http.createServer((req, res) => {
       });
       return;
     }
-    res.writeHead(200, { 'Content-Type': mime[ext] || 'text/plain' });
+    const headers = { 'Content-Type': mime[ext] || 'text/plain' };
+    // Service Worker darf nicht gecacht werden
+    if (urlPath === '/sw.js') headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+    // Manifest kurz cachen
+    if (urlPath === '/manifest.json') headers['Cache-Control'] = 'public, max-age=86400';
+    res.writeHead(200, headers);
     res.end(data);
   });
 }).listen(PORT, () => console.log(`Server running on port ${PORT}`));
