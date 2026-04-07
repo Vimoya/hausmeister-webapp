@@ -21,8 +21,9 @@ http.createServer((req, res) => {
   let urlPath = req.url.split('?')[0];
   if (urlPath === '/' || urlPath === '') urlPath = '/index.html';
 
+  // .well-known/assetlinks.json braucht keine Extension-Prüfung
   const filePath = path.join(__dirname, urlPath);
-  const ext = path.extname(filePath);
+  const ext = path.extname(filePath) || (urlPath.includes('assetlinks') ? '.json' : '');
 
   fs.readFile(filePath, (err, data) => {
     if (err) {

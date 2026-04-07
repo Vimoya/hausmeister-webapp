@@ -69,6 +69,7 @@
       "label": "Dashboard — Aufgaben und Übersicht"
     }
   ],
+  "prefer_related_applications": false,
   "shortcuts": [
     {
       "name": "Neue Aufgabe",
