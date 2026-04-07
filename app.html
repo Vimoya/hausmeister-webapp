@@ -2912,7 +2912,86 @@ function _userDoc() {
   return db.doc(`users/${uid}/data/main`);
 }
 
+// ── Offline-Queue: alle Daten lokal puffern ──
+function _saveLocalQueue() {
+  try {
+    localStorage.setItem('hmp_offline_data', JSON.stringify({
+      tasks, mieter, kunden, rechnungen, kostenvoranschlaege,
+      protokollEintraege, meldungen, objekte, zaehlerAblesungen,
+      dokumente, profil, gartenJobs, abnahmeProtokolle,
+      _pendingSync: true, _savedAt: Date.now()
+    }));
+  } catch(e) {}
+}
+
+function _loadLocalQueue() {
+  try {
+    const raw = localStorage.getItem('hmp_offline_data');
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function _clearLocalQueue() {
+  localStorage.removeItem('hmp_offline_data');
+}
+
+function _showOfflineBanner(show) {
+  let banner = document.getElementById('offline-sync-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'offline-sync-banner';
+    banner.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#c0622a;color:#fff;padding:8px 18px;border-radius:20px;font-size:0.78rem;font-weight:500;z-index:9999;box-shadow:0 2px 12px rgba(0,0,0,0.2);transition:opacity 0.3s;pointer-events:none;';
+    document.body.appendChild(banner);
+  }
+  if (show) {
+    banner.textContent = '📶 Offline — wird synchronisiert sobald Netz verfügbar';
+    banner.style.opacity = '1';
+    banner.style.display = 'block';
+  } else {
+    banner.style.opacity = '0';
+    setTimeout(() => { if (banner) banner.style.display = 'none'; }, 300);
+  }
+}
+
 async function saveAll() {
+  // Immer lokal speichern (auch wenn online)
+  _saveLocalQueue();
+
+  const ref = _userDoc();
+  if (!ref) return;
+
+  if (!navigator.onLine) {
+    _showOfflineBanner(true);
+    return;
+  }
+
+  try {
+    await ref.set({
+      tasks, mieter, kunden, rechnungen, kostenvoranschlaege,
+      protokollEintraege, meldungen, objekte, zaehlerAblesungen,
+      dokumente, profil, gartenJobs, abnahmeProtokolle
+    });
+    _clearLocalQueue();
+    _showOfflineBanner(false);
+  } catch(e) {
+    console.warn('Firestore save failed — im lokalen Puffer', e);
+    _showOfflineBanner(true);
+  }
+}
+
+// Automatisch sync wenn Netz zurückkommt
+window.addEventListener('online', async () => {
+  const q = _loadLocalQueue();
+  if (!q || !q._pendingSync) return;
+  showToast('Netz verfügbar — synchronisiere Daten…');
+  // Lokale Daten in Speicher laden
+  if (q.zaehlerAblesungen) zaehlerAblesungen = q.zaehlerAblesungen;
+  if (q.tasks)             tasks             = q.tasks;
+  if (q.protokollEintraege) protokollEintraege = q.protokollEintraege;
+  if (q.meldungen)         meldungen         = q.meldungen;
+  if (q.gartenJobs)        gartenJobs        = q.gartenJobs;
+  if (q.abnahmeProtokolle) abnahmeProtokolle = q.abnahmeProtokolle;
+  // Dann in Firestore schreiben
   const ref = _userDoc();
   if (!ref) return;
   try {
@@ -2921,12 +3000,31 @@ async function saveAll() {
       protokollEintraege, meldungen, objekte, zaehlerAblesungen,
       dokumente, profil, gartenJobs, abnahmeProtokolle
     });
-  } catch(e) { console.warn('Firestore save failed', e); }
-}
+    _clearLocalQueue();
+    _showOfflineBanner(false);
+    showToast('✓ Synchronisierung abgeschlossen');
+    renderZaehler();
+  } catch(e) { console.warn('Sync failed', e); }
+});
 
 async function loadAll() {
   const ref = _userDoc();
   if (!ref) return;
+
+  // Offline-Queue zuerst laden (sofortige Anzeige ohne Netz)
+  const localQ = _loadLocalQueue();
+  if (localQ) {
+    if (localQ.zaehlerAblesungen) zaehlerAblesungen = localQ.zaehlerAblesungen;
+    if (localQ.tasks)             tasks             = localQ.tasks;
+    if (localQ.mieter)            mieter            = localQ.mieter;
+    if (localQ.profil)            Object.assign(profil, localQ.profil);
+    if (localQ.protokollEintraege) protokollEintraege = localQ.protokollEintraege;
+    if (localQ.meldungen)         meldungen         = localQ.meldungen;
+    if (localQ.gartenJobs)        gartenJobs        = localQ.gartenJobs;
+    if (localQ.abnahmeProtokolle) abnahmeProtokolle = localQ.abnahmeProtokolle;
+    if (localQ._pendingSync)      _showOfflineBanner(true);
+  }
+
   try {
     const snap = await ref.get();
     if (!snap.exists) return;
@@ -2944,6 +3042,9 @@ async function loadAll() {
     if (d.profil)               Object.assign(profil, d.profil);
     if (d.gartenJobs)           gartenJobs           = d.gartenJobs;
     if (d.abnahmeProtokolle)    abnahmeProtokolle    = d.abnahmeProtokolle;
+    // Firestore erfolgreich geladen — lokalen Puffer löschen
+    _clearLocalQueue();
+    _showOfflineBanner(false);
   } catch(e) { console.warn('Firestore load failed', e); }
 }
 
